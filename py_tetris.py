@@ -24,6 +24,33 @@ clock = pygame.time.Clock()
 MY_VERSION = "1.0"
 top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
+scale = 90
+offset = 45
+start_x = WindowWidth / 2 - scale
+start_y = WindowHeight / 2 - scale - offset
+
+L = ['..X...',
+     '..X...',
+     '..X...',
+     '..XX..'
+     '......',
+     '......']
+
+O = ['......',
+     '..XX..',
+     '..XX..',
+     '......',
+     '......',
+     '......']
+
+Z = ['......',
+     '.XX...',
+     '..X...',
+     '..XX..',
+     '......',
+     '......']
+
+piece = [L, O, Z]
 
 
 def reset_game():
@@ -43,6 +70,18 @@ def play_field_grid(col, row, surface):
             pygame.draw.line(surface, (RED), (sx + j * 30, sy),
                              (sx + j * 30, sy + play_height))  # vertical lines
 
+def draw_piece(surface, select):
+    sx = top_left_x
+    sy = top_left_y
+    for i in (range(5)):
+        for j in (range(5)):
+            if piece[select][j][i] == "X":
+                #pygame.draw.circle(surface, WHITE, (int(start_x + scale * i), int(start_y + scale * j)), int(scale / 3))
+                pygame.draw.rect(surface, BLUE, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
+    # Update the screen
+    pygame.display.flip()
+
+
 def main():
     reset_game()
     loop = True
@@ -54,6 +93,7 @@ def main():
     font = pygame.font.SysFont('Arial', 50, False, False)
     font2 = pygame.font.SysFont('Arial', 25, False, False)
 
+
     while loop:
 
         # Update screen
@@ -61,6 +101,7 @@ def main():
 
         # Redraw Grid
         play_field_grid(10, 20, tetris_surface)
+        draw_piece(tetris_surface, 0)
         # Control FPS
         clock.tick(frame_rate)
 
