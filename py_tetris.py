@@ -19,6 +19,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 LIGHT_GREEN = (101, 152, 101)
 GREY = (128, 128, 128)
+YELLOW = (255,255,0)
+MAGENTA = (255,0,255)
 tetris_surface = pygame.display.set_mode((WindowWidth, WindowHeight))
 clock = pygame.time.Clock()
 MY_VERSION = "1.0"
@@ -27,7 +29,7 @@ top_left_y = WindowHeight - play_height - 80
 scale = 90
 offset = 45
 start_x = WindowWidth / 2 - scale
-start_y = WindowHeight / 2 - scale - offset
+start_y = WindowHeight / 2 - scale * 4
 
 
 L = ['......',
@@ -74,13 +76,16 @@ S = ['......',
 
 piece = [L, O, Z, T, I, S]
 
+piece_store = {}
+
 
 def reset_game():
     global frame_rate, game_over, tetris_lines, level
     tetris_lines = 0
     game_over = False
-    frame_rate = 1
+    frame_rate = 120
     level = 1
+
 
 def play_field_grid(col, row, surface):
     sx = top_left_x
@@ -92,17 +97,39 @@ def play_field_grid(col, row, surface):
             pygame.draw.line(surface, (RED), (sx + j * 30, sy),
                              (sx + j * 30, sy + play_height))  # vertical lines
 
-def draw_piece(surface, select, x, y, start):
+
+def draw_piece(surface, select, x, y, start, rotate):
+    # Colour map switch
+
+    if select == 0:
+        colour = BLUE
+    if select == 1:
+        colour = GREEN
+    if select == 2:
+        colour = RED
+    if select == 3:
+        colour = WHITE
+    if select == 4:
+        colour = YELLOW
+    if select == 5:
+        colour = MAGENTA
+
     if start:
-        sx = top_left_x
-        sy = top_left_y
+        sx = start_x
+        sy = start_y
     else:
         sx = x
         sy = y
-    for i in (range(5)):
-        for j in (range(5)):
-            if piece[select][j][i] == "X":
-                pygame.draw.rect(surface, BLUE, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
+    if rotate:
+        for i in (range(5)):
+            for j in (range(5)):
+                if piece[select][i][j] == "X":
+                    pygame.draw.rect(surface, colour, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
+    else:
+        for i in (range(5)):
+            for j in (range(5)):
+                if piece[select][j][i] == "X":
+                    pygame.draw.rect(surface, colour, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
     # Update the screen
     pygame.display.flip()
 
@@ -111,6 +138,11 @@ def update_play_field(surface, font, font2):
     tetris_surface.fill(BLACK)
     # Redraw Grid
     play_field_grid(10, 20, tetris_surface)
+
+    # Draw historic pieces
+    for piece in piece_store:
+        draw_piece(surface, piece_store[piece], piece[0], piece[1], False, False)
+
     # Update Display for user
     text = font.render("SCORE " + str(tetris_lines), True, WHITE)
     text2 = font.render("LEVEL " + str(level), True, WHITE)
@@ -125,9 +157,16 @@ def update_play_field(surface, font, font2):
     # Update the screen
     pygame.display.flip()
 
+
 def select_piece():
     piece_select = random.randrange(0, 5)
     return piece_select
+
+
+def freeze_piece(current_piece, x, y):
+    d = {(x, y): current_piece}
+    piece_store.update(dict(d))  # update it
+
 
 def main():
     reset_game()
@@ -139,13 +178,14 @@ def main():
     # Initialise fonts we will use
     font = pygame.font.SysFont('Arial', 50, False, False)
     font2 = pygame.font.SysFont('Arial', 25, False, False)
-    count = 0
+    rotate = False
 
     # Initialise the display
     x = start_x
     y = start_y
+    current_piece = select_piece()
     update_play_field(tetris_surface, font, font2)
-    draw_piece(tetris_surface, select_piece(), x, y, False)
+    draw_piece(tetris_surface, current_piece, x, y, False, False)
 
 
 
@@ -159,22 +199,28 @@ def main():
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    freeze_piece(current_piece, x, y)
+                    #print(piece_store)
                     update_play_field(tetris_surface, font, font2)
-                    draw_piece(tetris_surface, select_piece(), x, y, False)
+                    current_piece = select_piece()
+                    x = start_x
+                    y = start_y
+                    draw_piece(tetris_surface, current_piece, x, y, True, rotate)
 
                 if event.key == pygame.K_RIGHT:
-                        x = x + scale / 3
-                        update_play_field(tetris_surface, font, font2)
-                        draw_piece(tetris_surface, count, x, y, False)
+                    x = x + scale / 3
+                    update_play_field(tetris_surface, font, font2)
+                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_LEFT:
-                        x = x - scale / 3
-                        update_play_field(tetris_surface, font, font2)
-                        draw_piece(tetris_surface, count, x, y, False)
+                    x = x - scale / 3
+                    update_play_field(tetris_surface, font, font2)
+                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_DOWN:
-                        y = y + scale / 3
-                        update_play_field(tetris_surface, font, font2)
-                        draw_piece(tetris_surface, count, x, y, False)
-
+                    y = y + scale / 3
+                    update_play_field(tetris_surface, font, font2)
+                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                if event.key == pygame.K_UP:
+                    rotate = True
 
 
 # Call main
