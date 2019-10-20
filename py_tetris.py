@@ -32,47 +32,35 @@ start_x = WindowWidth / 2 - scale
 start_y = WindowHeight / 2 - scale * 4
 
 
-L = ['......',
-     '..X...',
-     '..X...',
-     '..XX..'
-     '......',
-     '......']
+L = ['....',
+     '.X..',
+     '.X..',
+     '.XX.']
 
-O = ['......',
-     '..XX..',
-     '..XX..',
-     '......',
-     '......',
-     '......']
+O = ['....',
+     '.XX.',
+     '.XX.',
+     '....']
 
-Z = ['......',
-     '..X...',
-     '..XX..',
-     '...X..',
-     '......',
-     '......']
+Z = ['....',
+     '.X..',
+     '.XX.',
+     '..X.']
 
-T = ['......',
-     '..X...',
-     '..XX..',
-     '..X...',
-     '......',
-     '......']
+T = ['....',
+     '.X..',
+     '.XX.',
+     '.X..']
 
-I = ['......',
-     '..X...',
-     '..X...',
-     '..X...',
-     '..X...',
-     '......']
+I =  ['.X..',
+      '.X..',
+      '.X..',
+      '.X..']
 
-S = ['......',
-     '...X..',
-     '..XX..',
-     '..X...',
-     '......',
-     '......']
+S = ['....',
+     '..X.',
+     '.XX.',
+     '.X..']
 
 piece = [L, O, Z, T, I, S]
 
@@ -121,13 +109,13 @@ def draw_piece(surface, select, x, y, start, rotate):
         sx = x
         sy = y
     if rotate:
-        for i in (range(5)):
-            for j in (range(5)):
+        for i in (range(4)):
+            for j in (range(4)):
                 if piece[select][i][j] == "X":
                     pygame.draw.rect(surface, colour, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
     else:
-        for i in (range(5)):
-            for j in (range(5)):
+        for i in (range(4)):
+            for j in (range(4)):
                 if piece[select][j][i] == "X":
                     pygame.draw.rect(surface, colour, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
     # Update the screen
@@ -167,6 +155,11 @@ def freeze_piece(current_piece, x, y):
     d = {(x, y): current_piece}
     piece_store.update(dict(d))  # update it
 
+def piece_occupied(current_piece, x, y):
+    for piece in piece_store:
+        if piece[0] == x and piece[1] == y:
+            return True
+
 
 def main():
     reset_game()
@@ -192,6 +185,11 @@ def main():
     while loop:
         # Control FPS
         clock.tick(frame_rate)
+
+        # Check if piece is occupied
+
+        if piece_occupied(current_piece, x, y):
+            print ("Overlapping!!")
 
         # Event handler
         for event in pygame.event.get():
