@@ -31,6 +31,28 @@ offset = 45
 start_x = WindowWidth / 2 - scale
 start_y = WindowHeight / 2 - scale * 4
 
+grid = ['O..........O',
+        'O..........O'
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O.....X....O',
+        'O.....X....O',
+        'O.....X....O',
+        'O.....X....O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'OOOOOOOOOOOO']
 
 L = ['....',
      '.X..',
@@ -85,6 +107,19 @@ def play_field_grid(col, row, surface):
             pygame.draw.line(surface, (RED), (sx + j * 30, sy),
                              (sx + j * 30, sy + play_height))  # vertical lines
 
+def play_field_grid2(row, col, surface):
+    sx = top_left_x
+    sy = top_left_y
+    for i in (range(col)):
+        for j in (range(row)):
+            if grid[j][i] == ".":
+                pygame.draw.rect(surface, GREY,
+                                 (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
+            if grid[j][i] == "X":
+                pygame.draw.rect(surface, BLACK,
+                                 (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
+
+
 
 def draw_piece(surface, select, x, y, start, rotate):
     # Colour map switch
@@ -125,7 +160,7 @@ def update_play_field(surface, font, font2):
     # Update screen
     tetris_surface.fill(BLACK)
     # Redraw Grid
-    play_field_grid(10, 20, tetris_surface)
+    play_field_grid2(20, 10, tetris_surface)
 
     # Draw historic pieces
     for piece in piece_store:
