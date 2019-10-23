@@ -26,10 +26,12 @@ clock = pygame.time.Clock()
 MY_VERSION = "1.0"
 top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
-scale = 90
+scale = 30
 offset = 45
 start_x = WindowWidth / 2 - scale
-start_y = WindowHeight / 2 - scale * 4
+start_y = WindowHeight / 2 - scale * 12
+
+grid2 = [[(0,0,0) for x in range(10)] for x in range(20)]
 
 grid = ['O..........O',
         'O..........O'
@@ -40,10 +42,10 @@ grid = ['O..........O',
         'O..........O',
         'O..........O',
         'O..........O',
-        'O.....X....O',
-        'O.....X....O',
-        'O.....X....O',
-        'O.....X....O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
+        'O..........O',
         'O..........O',
         'O..........O',
         'O..........O',
@@ -107,17 +109,6 @@ def play_field_grid(col, row, surface):
             pygame.draw.line(surface, (RED), (sx + j * 30, sy),
                              (sx + j * 30, sy + play_height))  # vertical lines
 
-def play_field_grid2(row, col, surface):
-    sx = top_left_x
-    sy = top_left_y
-    for i in (range(col)):
-        for j in (range(row)):
-            if grid[j][i] == ".":
-                pygame.draw.rect(surface, GREY,
-                                 (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
-            if grid[j][i] == "X":
-                pygame.draw.rect(surface, BLACK,
-                                 (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
 
 
 
@@ -143,16 +134,17 @@ def draw_piece(surface, select, x, y, start, rotate):
     else:
         sx = x
         sy = y
+
     if rotate:
         for i in (range(4)):
             for j in (range(4)):
                 if piece[select][i][j] == "X":
-                    pygame.draw.rect(surface, colour, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
+                    pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
     else:
         for i in (range(4)):
             for j in (range(4)):
                 if piece[select][j][i] == "X":
-                    pygame.draw.rect(surface, colour, (sx + i * scale / 3, sy + j * scale / 3, scale / 3 - 2, scale / 3 - 2))
+                    pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
     # Update the screen
     pygame.display.flip()
 
@@ -165,6 +157,10 @@ def update_play_field(surface, font, font2):
     # Draw historic pieces
     for piece in piece_store:
         draw_piece(surface, piece_store[piece], piece[0], piece[1], False, False)
+
+    #for g in grid:
+        #print(grid)
+        #draw_piece(surface, piece_store[piece], piece[0], piece[1], False, False)
 
     # Update Display for user
     text = font.render("SCORE " + str(tetris_lines), True, WHITE)
@@ -182,13 +178,41 @@ def update_play_field(surface, font, font2):
 
 
 def select_piece():
-    piece_select = random.randrange(0, 5)
+    piece_select = random.randrange(0, 6)
     return piece_select
+
+def play_field_grid2(col, row, surface):
+    sx = top_left_x
+    sy = top_left_y
+    for i in (range(row)):
+        for j in (range(col)):
+            if grid[j][i] == ".":
+                pygame.draw.rect(surface, GREY,
+                                 (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
+            if grid[j][i] == "X":
+                pygame.draw.rect(surface, BLACK,
+                                 (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
 
 
 def freeze_piece(current_piece, x, y):
     d = {(x, y): current_piece}
     piece_store.update(dict(d))  # update it
+    # Loop over the background array and add the piece in there
+    # sx + i * scale / 3, sy + j * scale / 3
+    # Convert x y to col row --- we need more though we need to convert the shape to multiple col row depending on it's shape
+
+    print (((x - start_x) // scale) + 5, (y - start_y) // scale)
+    col = int(((x - start_x) // scale) + 5)
+    row = int(((y - start_y) // scale))
+
+    print(grid2[row][col])
+    grid2[row][col] = (255, 255, 255)
+    print (grid2[row][col])
+    for i in (range(20)):
+        for j in (range(10)):
+            print(grid2[i][j])
+
+
 
 def piece_occupied(current_piece, x, y):
     for piece in piece_store:
@@ -223,8 +247,8 @@ def main():
 
         # Check if piece is occupied
 
-        if piece_occupied(current_piece, x, y):
-            print ("Overlapping!!")
+        #if piece_occupied(current_piece, x, y):
+            #print ("Overlapping!!")
 
         # Event handler
         for event in pygame.event.get():
@@ -239,17 +263,18 @@ def main():
                     x = start_x
                     y = start_y
                     draw_piece(tetris_surface, current_piece, x, y, True, rotate)
+                    #print(grid)
 
                 if event.key == pygame.K_RIGHT:
-                    x = x + scale / 3
+                    x = x + scale
                     update_play_field(tetris_surface, font, font2)
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_LEFT:
-                    x = x - scale / 3
+                    x = x - scale
                     update_play_field(tetris_surface, font, font2)
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_DOWN:
-                    y = y + scale / 3
+                    y = y + scale
                     update_play_field(tetris_surface, font, font2)
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_UP:
