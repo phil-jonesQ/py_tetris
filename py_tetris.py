@@ -1,5 +1,7 @@
 """ Version 1.00 - simple version of the tetris game.. The game uses pygame to handle the graphics and is desinged on a grid
 Phil Jones September 2019 - phil.jones.24.4@gmail.com
+October 28 - Can now control pieces and freeze them, this stores them in the master array as block and colour
+This should make collision detection and line detection easier etc
 """
 
 import pygame
@@ -28,33 +30,10 @@ top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
 scale = 30
 offset = 45
-start_x = WindowWidth / 2 - scale
-start_y = WindowHeight / 2 - scale * 12
+start_x = WindowWidth / 2
+start_y = WindowHeight / 2 - scale * 11
 
 grid2 = [[(0,0,0) for x in range(10)] for x in range(20)]
-
-grid = ['O..........O',
-        'O..........O'
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'O..........O',
-        'OOOOOOOOOOOO']
 
 L = ['....',
      '.X..',
@@ -99,34 +78,25 @@ def reset_game():
     level = 1
 
 
-def play_field_grid(col, row, surface):
-    sx = top_left_x
-    sy = top_left_y
-    for i in range(row + 1):
-        pygame.draw.line(surface, (RED), (sx, sy + i * 30),
-                         (sx + play_width, sy + i * 30))  # horizontal lines
-        for j in range(col + 1):
-            pygame.draw.line(surface, (RED), (sx + j * 30, sy),
-                             (sx + j * 30, sy + play_height))  # vertical lines
-
-
+def colour_map(piece):
+    if piece == 0:
+        colour = BLUE
+    if piece == 1:
+        colour = GREEN
+    if piece == 2:
+        colour = RED
+    if piece == 3:
+        colour = WHITE
+    if piece == 4:
+        colour = YELLOW
+    if piece == 5:
+        colour = MAGENTA
+    return colour
 
 
 def draw_piece(surface, select, x, y, start, rotate):
-    # Colour map switch
 
-    if select == 0:
-        colour = BLUE
-    if select == 1:
-        colour = GREEN
-    if select == 2:
-        colour = RED
-    if select == 3:
-        colour = WHITE
-    if select == 4:
-        colour = YELLOW
-    if select == 5:
-        colour = MAGENTA
+    colour = colour_map(select)
 
     if start:
         sx = start_x
@@ -151,16 +121,22 @@ def draw_piece(surface, select, x, y, start, rotate):
 def update_play_field(surface, font, font2):
     # Update screen
     tetris_surface.fill(BLACK)
-    # Redraw Grid
-    play_field_grid2(20, 10, tetris_surface)
 
-    # Draw historic pieces
-    for piece in piece_store:
-        draw_piece(surface, piece_store[piece], piece[0], piece[1], False, False)
+    # Draw historic pieces and grid space
+    row = 20
+    col = 10
+    for i in (range(row)):
+        for j in (range(col)):
+            if grid2[i][j] != (0,0,0):
+                sx = ((start_x - (5 * scale)) + (j * scale))
+                sy = (start_y + (i * scale))
+                #print(start_x,sx,sy)
+                pygame.draw.rect(surface, grid2[i][j], (sx, sy, scale - 2, scale - 2))
+            else:
+                sx = ((start_x - (5 * scale)) + (j * scale))
+                sy = (start_y + (i * scale))
+                pygame.draw.rect(surface, GREY, (sx, sy, scale - 2, scale - 2))
 
-    #for g in grid:
-        #print(grid)
-        #draw_piece(surface, piece_store[piece], piece[0], piece[1], False, False)
 
     # Update Display for user
     text = font.render("SCORE " + str(tetris_lines), True, WHITE)
@@ -181,43 +157,41 @@ def select_piece():
     piece_select = random.randrange(0, 6)
     return piece_select
 
-def play_field_grid2(col, row, surface):
-    sx = top_left_x
-    sy = top_left_y
-    for i in (range(row)):
-        for j in (range(col)):
-            if grid[j][i] == ".":
-                pygame.draw.rect(surface, GREY,
-                                 (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
-            if grid[j][i] == "X":
-                pygame.draw.rect(surface, BLACK,
-                                 (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
-
 
 def freeze_piece(current_piece, x, y):
+    # May or may not need this
     d = {(x, y): current_piece}
     piece_store.update(dict(d))  # update it
-    # Loop over the background array and add the piece in there
-    # sx + i * scale / 3, sy + j * scale / 3
-    # Convert x y to col row --- we need more though we need to convert the shape to multiple col row depending on it's shape
-
-    print (((x - start_x) // scale) + 5, (y - start_y) // scale)
+    # Convert the x / y to row col
     col = int(((x - start_x) // scale) + 5)
     row = int(((y - start_y) // scale))
-
-    print(grid2[row][col])
-    grid2[row][col] = (255, 255, 255)
-    print (grid2[row][col])
-    for i in (range(20)):
-        for j in (range(10)):
-            print(grid2[i][j])
-
+    # Freeze the piece in the master grid array recording it's colour
+    for i in (range(4)):
+        for j in (range(4)):
+            if piece[current_piece][i][j] == "X":
+                grid2[row + i][col + j] = (colour_map(current_piece))
 
 
 def piece_occupied(current_piece, x, y):
     for piece in piece_store:
         if piece[0] == x and piece[1] == y:
             return True
+
+def does_piece_fit(current_piece, x, y):
+    # Convert the x / y to row col
+    col = int(((x - start_x) // scale) + 5)
+    row = int(((y - start_y) // scale))
+    # Freeze the piece in the master grid array recording it's colour
+    for i in (range(4)):
+        for j in (range(4)):
+            if piece[current_piece][i][j] == "X":
+                for a in (range(row)):
+                    for b in (range(col)):
+                        if grid2[a][b] != (0, 0, 0):
+                            return False
+                        else:
+                            return True
+
 
 
 def main():
@@ -245,6 +219,10 @@ def main():
         # Control FPS
         clock.tick(frame_rate)
 
+        # Check if piece fits
+
+        print (does_piece_fit(current_piece, x, y))
+
         # Check if piece is occupied
 
         #if piece_occupied(current_piece, x, y):
@@ -264,7 +242,7 @@ def main():
                     y = start_y
                     draw_piece(tetris_surface, current_piece, x, y, True, rotate)
                     #print(grid)
-
+                print(x,y)
                 if event.key == pygame.K_RIGHT:
                     x = x + scale
                     update_play_field(tetris_surface, font, font2)
