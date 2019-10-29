@@ -178,23 +178,31 @@ def piece_occupied(current_piece, x, y):
         if piece[0] == x and piece[1] == y:
             return True
 
+
 def does_piece_fit(current_piece, x, y):
     # Convert the x / y to row col
-    #col = int(((x - start_x) // scale) + 5)
-    #row = int(((y - start_y) // scale))
+    current_col = int(((x - start_x) // scale) + 5)
+    current_row = int(((y - start_y) // scale))
+    print (current_col, current_row)
     col = 10
     row = 20
     # Freeze the piece in the master grid array recording it's colour
     #for i in (range(4)):
         #for j in (range(4)):
             #if piece[current_piece][i][j] == "X" and grid2[a][b] != (0, 0, 0):
-    for a in (range(row)):
-        for b in (range(col)):
-            if grid2[a][b] != (0, 0, 0):
-                print("Block occupied!")
-                return False
+    for i in (range(row)):
+        for j in (range(col)):
+            if grid2[current_row][current_col] != (0, 0, 0):
+                    print ("piece is occupied and block is")
+                #sx = ((start_x - (5 * scale)) + (j * scale))
+                #sy = (start_y + (i * scale))
+                # print(start_x,sx,sy)
+                #pygame.draw.rect(surface, grid2[i][j], (sx, sy, scale - 2, scale - 2))
             else:
-                return True
+                pass
+                #sx = ((start_x - (5 * scale)) + (j * scale))
+                #sy = (start_y + (i * scale))
+                #pygame.draw.rect(surface, GREY, (sx, sy, scale - 2, scale - 2))
 
 
 
@@ -226,7 +234,7 @@ def main():
         # Check if piece fits
 
         does_it = does_piece_fit(current_piece, x, y)
-        print (does_it)
+        #print (does_it)
         # Check if piece is occupied
 
         #if piece_occupied(current_piece, x, y):
