@@ -128,6 +128,7 @@ def update_play_field(surface, font, font2):
     for i in (range(row)):
         for j in (range(col)):
             if grid2[i][j] != (0,0,0):
+                #print (grid2[i][j])
                 sx = ((start_x - (5 * scale)) + (j * scale))
                 sy = (start_y + (i * scale))
                 #print(start_x,sx,sy)
@@ -179,18 +180,21 @@ def piece_occupied(current_piece, x, y):
 
 def does_piece_fit(current_piece, x, y):
     # Convert the x / y to row col
-    col = int(((x - start_x) // scale) + 5)
-    row = int(((y - start_y) // scale))
+    #col = int(((x - start_x) // scale) + 5)
+    #row = int(((y - start_y) // scale))
+    col = 10
+    row = 20
     # Freeze the piece in the master grid array recording it's colour
-    for i in (range(4)):
-        for j in (range(4)):
-            if piece[current_piece][i][j] == "X":
-                for a in (range(row)):
-                    for b in (range(col)):
-                        if grid2[a][b] != (0, 0, 0):
-                            return False
-                        else:
-                            return True
+    #for i in (range(4)):
+        #for j in (range(4)):
+            #if piece[current_piece][i][j] == "X" and grid2[a][b] != (0, 0, 0):
+    for a in (range(row)):
+        for b in (range(col)):
+            if grid2[a][b] != (0, 0, 0):
+                print("Block occupied!")
+                return False
+            else:
+                return True
 
 
 
@@ -221,8 +225,8 @@ def main():
 
         # Check if piece fits
 
-        print (does_piece_fit(current_piece, x, y))
-
+        does_it = does_piece_fit(current_piece, x, y)
+        print (does_it)
         # Check if piece is occupied
 
         #if piece_occupied(current_piece, x, y):
@@ -242,7 +246,7 @@ def main():
                     y = start_y
                     draw_piece(tetris_surface, current_piece, x, y, True, rotate)
                     #print(grid)
-                print(x,y)
+                #print(x,y)
                 if event.key == pygame.K_RIGHT:
                     x = x + scale
                     update_play_field(tetris_surface, font, font2)
