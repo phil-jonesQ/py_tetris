@@ -192,17 +192,23 @@ def does_piece_fit(current_piece, x, y):
             #if piece[current_piece][i][j] == "X" and grid2[a][b] != (0, 0, 0):
     for i in (range(row)):
         for j in (range(col)):
-            if grid2[current_row][current_col] != (0, 0, 0):
-                    print ("piece is occupied and block is")
-                #sx = ((start_x - (5 * scale)) + (j * scale))
-                #sy = (start_y + (i * scale))
-                # print(start_x,sx,sy)
-                #pygame.draw.rect(surface, grid2[i][j], (sx, sy, scale - 2, scale - 2))
-            else:
-                pass
-                #sx = ((start_x - (5 * scale)) + (j * scale))
-                #sy = (start_y + (i * scale))
-                #pygame.draw.rect(surface, GREY, (sx, sy, scale - 2, scale - 2))
+            for a in (range(4)):
+                for b in (range(4)):
+                    if grid2[current_row + a][current_col + b] == (0, 0, 0) and grid2[i][j] == (0, 0, 0):
+                        print ("piece is free at " + str(current_row + a), str(current_col + b))
+                        return True
+                    if grid2[current_row - a][current_col - b] == (0, 0, 0) and grid2[i][j] == (0, 0, 0):
+                        print ("piece is free at " + str(current_row + a), str(current_col + b))
+                        return True
+                    if grid2[current_row - a][current_col + b] == (0, 0, 0) and grid2[i][j] == (0, 0, 0):
+                        print ("piece is free at " + str(current_row + a), str(current_col + b))
+                        return True
+                    if grid2[current_row + a][current_col - b] == (0, 0, 0) and grid2[i][j] == (0, 0, 0):
+                        print ("piece is free at " + str(current_row + a), str(current_col + b))
+                        return True
+                    else:
+                        print ("piece is NOT free at " + str(current_row + a), str(current_col + b))
+                        return False
 
 
 
@@ -256,19 +262,24 @@ def main():
                     #print(grid)
                 #print(x,y)
                 if event.key == pygame.K_RIGHT:
-                    x = x + scale
-                    update_play_field(tetris_surface, font, font2)
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                    if does_piece_fit(current_piece, x, y):
+                        x = x + scale
+                        update_play_field(tetris_surface, font, font2)
+                        draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_LEFT:
-                    x = x - scale
-                    update_play_field(tetris_surface, font, font2)
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                    if does_piece_fit(current_piece, x, y):
+                        x = x - scale
+                        update_play_field(tetris_surface, font, font2)
+                        draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_DOWN:
-                    y = y + scale
+                    if does_piece_fit(current_piece, x, y):
+                        y = y + scale
+                        update_play_field(tetris_surface, font, font2)
+                        draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                if event.key == pygame.K_UP:
+                    y = y - scale
                     update_play_field(tetris_surface, font, font2)
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
-                if event.key == pygame.K_UP:
-                    rotate = True
 
 
 # Call main
