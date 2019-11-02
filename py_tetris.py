@@ -33,7 +33,7 @@ offset = 45
 start_x = WindowWidth / 2
 start_y = WindowHeight / 2 - scale * 11
 
-grid2 = [[(0,0,0) for x in range(10)] for x in range(20)]
+grid2 = [[(0,0,0) for x in range(10)] for x in range(21)]
 
 L = ['....',
      '.X..',
@@ -75,7 +75,7 @@ def reset_game():
     global frame_rate, game_over, tetris_lines, level
     tetris_lines = 0
     game_over = False
-    frame_rate = 120
+    frame_rate = 5
     level = 1
 
 
@@ -134,12 +134,11 @@ def update_play_field(surface, font, font2):
     for i in (range(row)):
         for j in (range(col)):
             if grid2[i][j] != (0, 0, 0):
-                #print ("Ocuupied " + str(i), str(j))
+                # Record each pieces coords in the piece store dictionary
                 d = {(i, j): grid2[i][j]}
                 occupied_store.update(dict(d))  # update it
                 sx = ((start_x - (5 * scale)) + (j * scale))
                 sy = (start_y + (i * scale))
-                #print("draw block historic at " + str(sx), str(sy))
                 pygame.draw.rect(surface, grid2[i][j], (sx, sy, scale - 2, scale - 2))
             else:
                 sx = ((start_x - (5 * scale)) + (j * scale))
@@ -167,6 +166,8 @@ def select_piece():
     #piece_select = 3
     return piece_select
 
+def check_line():
+    pass
 
 def freeze_piece(current_piece, x, y):
     # May or may not need this
@@ -180,6 +181,7 @@ def freeze_piece(current_piece, x, y):
         for j in (range(4)):
             if piece[current_piece][i][j] == "X":
                 grid2[row + i][col + j] = (colour_map(current_piece))
+                print (row + i, col + j)
                 #d = {(i, j): grid2[i][j]}
                 #occupied_store.update(dict(d))  # update it
 
@@ -195,8 +197,6 @@ def does_piece_fit(current_piece, x, y):
     global bound, next_piece
     overlap = False
 
-
-
     for i in (range(4)):
         for j in (range(4)):
             if piece[current_piece][i][j] == "X":
@@ -207,32 +207,31 @@ def does_piece_fit(current_piece, x, y):
                 if not occupied_store:
                     if current_row == 19:
                         next_piece = True
+                    if current_col == 0:
+                        #print ("Edge")
+                        bound = "L"
+                    if current_col == 9:
+                        #print ("Edge")
+                        bound = "R"
                 for pos in occupied_store:
                     #print("In check " + str(i), str(j))
-                    print("In check " + str(i), str(j) + "Piece Pos is" + str(pos) + "Current piece is " + str(current_row), str(current_col))
+                    #print("In check " + str(i), str(j) + "Piece Pos is" + str(pos) + "Current piece is " + str(current_row), str(current_col))
                     # Hit bottom row?
                     if current_row == 19:
                         next_piece = True
-
                     if current_col == 0:
-                        print ("Edge")
+                        #print ("Edge")
                         bound = "L"
-                        #return False
-                    if current_col == 8:
-                        print ("Edge")
+                    if current_col == 9:
+                        #print ("Edge")
                         bound = "R"
-                        #return False
-                    #print (pos)
-                    #print(current_row, current_col)
                     if pos == (current_row, current_col):
-                        print ("About to overlap")
+                        #print ("About to overlap")
                         overlap = True
                         next_piece = True
-                        #return False
                     else:
                         overlap = False
-                        #print ("No overlap")
-                        #return True
+
 
     #print ("End check")
     if overlap is True or bound == "R" or bound == "L":
@@ -254,48 +253,59 @@ def main():
     rotate = False
 
     # Initialise the display
-    x = start_x
-    y = start_y
+    x = start_x - scale * 2
+    y = start_y - scale * 2
     current_piece = select_piece()
     update_play_field(tetris_surface, font, font2)
     draw_piece(tetris_surface, current_piece, x, y, False, False)
 
-    global bound, next_piece
+    global bound, next_piece, fall
     bound = "N"
     next_piece = False
-
-
-
+    fall = True
 
     while loop:
         # Control FPS
         clock.tick(frame_rate)
 
+        # Spawn next piece
+        if next_piece:
+            next_piece = False
+            freeze_piece(current_piece, x, y)
+            current_piece = select_piece()
+            x = start_x
+            y = start_y - scale * 2
+            draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+
+        # Update the display
+        update_play_field(tetris_surface, font, font2)
+        draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+
+        # Make piece fall
+        if does_piece_fit(current_piece, x, y) or bound == "N" or bound == "R" or bound == "L" or fall:
+            y = y + scale
+
+        # Check for a line
+
+        check_line()
+
+        # Check if lost
+
+
         # Check if piece fits
-
-
-        #print (does_it)
-        # Check if piece is occupied
-        #print("Piece starter " + str(x), str(y))
         does_piece_fit(current_piece, x, y)
-
-        #if piece_occupied(current_piece, x, y):
-            #print ("Overlapping!!")
-
 
         # Event handler
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE or next_piece:
+                if event.key == pygame.K_SPACE:
                     next_piece = False
                     freeze_piece(current_piece, x, y)
-                    #print(piece_store)
-                    update_play_field(tetris_surface, font, font2)
                     current_piece = select_piece()
                     x = start_x
-                    y = start_y
+                    y = start_y - scale * 2
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                     #print(grid)
 
@@ -304,28 +314,30 @@ def main():
                     if does_piece_fit(current_piece, x, y) or bound != "R":
                         bound = "N"
                         x = x + scale
-                    update_play_field(tetris_surface, font, font2)
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                    #update_play_field(tetris_surface, font, font2)
+                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_LEFT:
                     #x = x - scale
                     if does_piece_fit(current_piece, x, y) or bound != "L":
                         bound = "N"
                         x = x - scale
-                    does_piece_fit(current_piece, x, y)
-                    update_play_field(tetris_surface, font, font2)
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                    #does_piece_fit(current_piece, x, y)
+                    #update_play_field(tetris_surface, font, font2)
+                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_DOWN:
                     #y = y + scale
-                    if does_piece_fit(current_piece, x, y) or bound == "N":
+                    if does_piece_fit(current_piece, x, y) or bound == "N" or bound == "R" or bound == "L" or fall:
                         y = y + scale
-                    update_play_field(tetris_surface, font, font2)
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                    #update_play_field(tetris_surface, font, font2)
+                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_UP:
                     #y = y - scale
                     if does_piece_fit(current_piece, x, y):
                         y = y - scale
-                    update_play_field(tetris_surface, font, font2)
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                    #update_play_field(tetris_surface, font, font2)
+                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+
+
 
 
 # Call main
