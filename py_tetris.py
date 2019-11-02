@@ -163,7 +163,7 @@ def update_play_field(surface, font, font2):
 
 def select_piece():
     piece_select = random.randrange(0, 6)
-    #piece_select = 3
+    piece_select = 1
     return piece_select
 
 
@@ -175,13 +175,11 @@ def check_line():
         for j in (range(col)):
             if grid2[i][j] != (0, 0, 0):
                 hit_count = 0
-                for b in (range(j)):
-                    hit_count = hit_count + 1
-                    #print("row " + str(i) + " has " + str(j) + " Hits")
-                    if j == 1 and j == 2 and j == 3 and j == 4 and j == 5 and j == 6 and j == 7 and j == 8 \
-                            and j == 9:
-                        print("row " + str(i) + " is full")
-
+                for b in (range(10)):
+                    if grid2[i][b] != (0, 0, 0):
+                        hit_count += 1
+                if hit_count == 10:
+                    print ("Calling remove row on " + str(i))
 
 
 def freeze_piece(current_piece, x, y):
