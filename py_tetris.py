@@ -166,8 +166,23 @@ def select_piece():
     #piece_select = 3
     return piece_select
 
+
 def check_line():
-    pass
+    row = 20
+    col = 10
+    hit_count = 0
+    for i in (range(row)):
+        for j in (range(col)):
+            if grid2[i][j] != (0, 0, 0):
+                hit_count = 0
+                for b in (range(j)):
+                    hit_count = hit_count + 1
+                    #print("row " + str(i) + " has " + str(j) + " Hits")
+                    if j == 1 and j == 2 and j == 3 and j == 4 and j == 5 and j == 6 and j == 7 and j == 8 \
+                            and j == 9:
+                        print("row " + str(i) + " is full")
+
+
 
 def freeze_piece(current_piece, x, y):
     # May or may not need this
@@ -181,7 +196,7 @@ def freeze_piece(current_piece, x, y):
         for j in (range(4)):
             if piece[current_piece][i][j] == "X":
                 grid2[row + i][col + j] = (colour_map(current_piece))
-                print (row + i, col + j)
+                #print (row + i, col + j)
                 #d = {(i, j): grid2[i][j]}
                 #occupied_store.update(dict(d))  # update it
 
@@ -282,8 +297,9 @@ def main():
         draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
         # Make piece fall
-        if does_piece_fit(current_piece, x, y) or bound == "N" or bound == "R" or bound == "L" or fall:
-            y = y + scale
+        if fall:
+            if does_piece_fit(current_piece, x, y) or bound == "N" or bound == "R" or bound == "L" or fall:
+                y = y + scale
 
         # Check for a line
 
