@@ -33,7 +33,7 @@ offset = 45
 start_x = WindowWidth / 2
 start_y = WindowHeight / 2 - scale * 11
 
-grid2 = [[(0,0,0) for x in range(10)] for x in range(21)]
+grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
 
 L = ['....',
      '.X..',
@@ -61,11 +61,43 @@ I =  ['.X..',
       '.X..']
 
 S = ['....',
-     '..X.',
+      '..X.',
+      '.XX.',
+      '.X..']
+
+L1 = ['....',
+      '...X',
+      '.XXX',
+      '....']
+
+O1 = ['....',
+      '.XX.',
+      '.XX.',
+      '....']
+
+Z1 = ['....',
+      '.XX.',
+      '..XX',
+      '....']
+
+T1 = ['....',
+      '..X.',
+      '.XXX',
+      '....']
+
+I1 =  ['....',
+       '....',
+       '....',
+       'XXXX']
+
+
+S1 = ['....',
+     '..XX',
      '.XX.',
-     '.X..']
+     '....']
 
 piece = [L, O, Z, T, I, S]
+piece1 = [L1, O1, Z1, T1, I1, S1]
 
 
 def reset_game():
@@ -95,7 +127,7 @@ def colour_map(piece):
 def draw_piece(surface, select, x, y, start, rotater):
     colour = colour_map(select)
 
-    print(rotater)
+    #print(rotater)
 
     if start:
         sx = start_x
@@ -103,7 +135,6 @@ def draw_piece(surface, select, x, y, start, rotater):
     else:
         sx = x
         sy = y
-
 
     if rotater == 1:
         for i in (range(4)):
@@ -114,15 +145,9 @@ def draw_piece(surface, select, x, y, start, rotater):
     if rotater == 2:
         for i in (range(4)):
             for j in (range(4)):
-                if piece[select][i][j] == "X":
+                if piece1[select][j][i] == "X":
                     pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
 
-    if rotater == 3:
-        for i in (range(3,-1,-1)):
-            for j in (range(3, -1, -1)):
-                print(i,j)
-                if piece[select][i][j] == "X":
-                    pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
 
     # Update the screen
     pygame.display.flip()
@@ -187,7 +212,7 @@ def remove_line(remove_row):
     ## Clear row
     for j in (range(col)):
         grid2[remove_row][j] = (0, 0, 0)
-    row = 4
+    row = 8
     col = 10
     ## Move all blocks down if space if free
     for i in (range(row)):
@@ -197,15 +222,23 @@ def remove_line(remove_row):
                     grid2[remove_row - i][j] = (0, 0, 0)
 
 
-def freeze_piece(current_piece, x, y):
+def freeze_piece(current_piece, x, y, rotater):
+    print (rotater)
     # Convert the x / y to row col
     col = int(((x - start_x) // scale) + 5)
     row = int(((y - start_y) // scale))
     # Freeze the piece in the master grid array recording it's colour
-    for i in (range(4)):
-        for j in (range(4)):
-            if piece[current_piece][i][j] == "X":
-                grid2[row + i][col + j] = (colour_map(current_piece))
+    if rotater == 1:
+        for i in (range(4)):
+            for j in (range(4)):
+                if piece[current_piece][i][j] == "X":
+                    grid2[row + i][col + j] = (colour_map(current_piece))
+    if rotater == 2:
+        for i in (range(4)):
+            for j in (range(4)):
+                if piece1[current_piece][i][j] == "X":
+                    grid2[row + i][col + j] = (colour_map(current_piece))
+
 
 def does_piece_fit2(current_piece, x, y):
     # Convert the x / y to row col
@@ -265,7 +298,6 @@ def main():
     # Initialise fonts we will use
     font = pygame.font.SysFont('Arial', 50, False, False)
     font2 = pygame.font.SysFont('Arial', 25, False, False)
-    rotate = False
 
     # Initialise the display
     x = start_x - scale * 2
@@ -277,19 +309,19 @@ def main():
     global bound, next_piece, fall
     bound = "N"
     next_piece = False
-    fall = True
+    fall = False
     rotate = 1
 
     while loop:
         # Control FPS
         clock.tick(frame_rate)
-
+        #print (current_piece)
         # Spawn next piece
         if next_piece:
             next_piece = False
-            rotate = 1
-            freeze_piece(current_piece, x, y)
+            freeze_piece(current_piece, x, y, rotate)
             current_piece = select_piece()
+            rotate = 1
             x = start_x
             y = start_y - scale * 2
             draw_piece(tetris_surface, current_piece, x, y, False, rotate)
@@ -319,7 +351,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     next_piece = False
-                    freeze_piece(current_piece, x, y)
+                    freeze_piece(current_piece, x, y, rotate)
                     current_piece = select_piece()
                     x = start_x
                     y = start_y - scale * 2
@@ -352,7 +384,7 @@ def main():
                     #if does_piece_fit2(current_piece, x, y):
                     #    y = y - scale
                     rotate += 1
-                    if rotate > 3:
+                    if rotate > 2:
                         rotate = 1
                     #update_play_field(tetris_surface, font, font2)
                     #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
