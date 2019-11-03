@@ -117,10 +117,7 @@ def draw_piece(surface, select, x, y, start, rotate):
             for j in (range(4)):
                 if piece[select][j][i] == "X":
                     pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
-                    #print("draw block live at " + str(sx + i * scale), str(sy + j * scale))
-                    #sx2 = ((sx - (5 * scale)) + (i * scale))
-                    #sy2 = (sy + (j * scale))
-                    #pygame.draw.rect(surface, colour, (sx2, sy2, scale - 2, scale - 2))
+
     # Update the screen
     pygame.display.flip()
 
@@ -170,7 +167,6 @@ def select_piece():
 def check_line():
     row = 20
     col = 10
-    hit_count = 0
     for i in (range(row)):
         for j in (range(col)):
             if grid2[i][j] != (0, 0, 0):
@@ -180,6 +176,14 @@ def check_line():
                         hit_count += 1
                 if hit_count == 10:
                     print ("Calling remove row on " + str(i))
+                    remove_line(i)
+
+
+def remove_line(row):
+    col = 10
+    for j in (range(col)):
+        grid2[row][j] = (0, 0, 0)
+
 
 
 def freeze_piece(current_piece, x, y):
