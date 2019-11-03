@@ -72,7 +72,7 @@ def reset_game():
     global frame_rate, game_over, tetris_lines, level
     tetris_lines = 0
     game_over = False
-    frame_rate = 5
+    frame_rate = 10
     level = 1
 
 
@@ -172,10 +172,20 @@ def check_line():
                     remove_line(i)
 
 
-def remove_line(row):
+def remove_line(remove_row):
     col = 10
+    ## Clear row
     for j in (range(col)):
-        grid2[row][j] = (0, 0, 0)
+        grid2[remove_row][j] = (0, 0, 0)
+    row = 20
+    col = 10
+    ## Move all blocks down if space if free
+    for i in (range(row)):
+        for j in (range(col)):
+            if not remove_row == 19:
+                if grid2[remove_row - i][j] != (0, 0, 0) and grid2[remove_row + i][j] == (0, 0, 0):
+                    grid2[remove_row - i][j] = grid2[remove_row + i][j]
+                    #grid2[remove_row - 1][j] = (0, 0, 0)
 
 
 def freeze_piece(current_piece, x, y):
