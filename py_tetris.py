@@ -92,8 +92,10 @@ def colour_map(piece):
     return colour
 
 
-def draw_piece(surface, select, x, y, start, rotate):
+def draw_piece(surface, select, x, y, start, rotater):
     colour = colour_map(select)
+
+    print(rotater)
 
     if start:
         sx = start_x
@@ -102,16 +104,24 @@ def draw_piece(surface, select, x, y, start, rotate):
         sx = x
         sy = y
 
-    if rotate:
-        for i in (range(4)):
-            for j in (range(4)):
-                if piece[select][i][j] == "X":
-                    pass
-                    #pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
-    else:
+
+    if rotater == 1:
         for i in (range(4)):
             for j in (range(4)):
                 if piece[select][j][i] == "X":
+                    pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
+
+    if rotater == 2:
+        for i in (range(4)):
+            for j in (range(4)):
+                if piece[select][i][j] == "X":
+                    pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
+
+    if rotater == 3:
+        for i in (range(3,-1,-1)):
+            for j in (range(3, -1, -1)):
+                print(i,j)
+                if piece[select][i][j] == "X":
                     pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
 
     # Update the screen
@@ -153,7 +163,7 @@ def update_play_field(surface, font, font2):
 
 def select_piece():
     piece_select = random.randrange(0, 6)
-    piece_select = 1
+    #piece_select = 1
     return piece_select
 
 
@@ -177,15 +187,14 @@ def remove_line(remove_row):
     ## Clear row
     for j in (range(col)):
         grid2[remove_row][j] = (0, 0, 0)
-    row = 20
+    row = 4
     col = 10
     ## Move all blocks down if space if free
     for i in (range(row)):
         for j in (range(col)):
-            if not remove_row == 19:
-                if grid2[remove_row - i][j] != (0, 0, 0) and grid2[remove_row + i][j] == (0, 0, 0):
-                    grid2[remove_row - i][j] = grid2[remove_row + i][j]
-                    #grid2[remove_row - 1][j] = (0, 0, 0)
+                if grid2[remove_row - i][j] != (0, 0, 0):
+                    grid2[remove_row][j] = grid2[remove_row - i][j]
+                    grid2[remove_row - i][j] = (0, 0, 0)
 
 
 def freeze_piece(current_piece, x, y):
@@ -232,7 +241,7 @@ def does_piece_fit2(current_piece, x, y):
                             current_row = int(((y) // scale)) + i
                             #print("In check " + str(i), str(j))
                             if r == current_row and c == current_col:
-                                print (r, c, current_row, current_col)
+                                #print (r, c, current_row, current_col)
                                 overlap = True
                                 next_piece = True
                             else:
@@ -263,12 +272,13 @@ def main():
     y = start_y - scale * 2
     current_piece = select_piece()
     update_play_field(tetris_surface, font, font2)
-    draw_piece(tetris_surface, current_piece, x, y, False, False)
+    draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
     global bound, next_piece, fall
     bound = "N"
     next_piece = False
     fall = True
+    rotate = 1
 
     while loop:
         # Control FPS
@@ -277,6 +287,7 @@ def main():
         # Spawn next piece
         if next_piece:
             next_piece = False
+            rotate = 1
             freeze_piece(current_piece, x, y)
             current_piece = select_piece()
             x = start_x
@@ -338,8 +349,11 @@ def main():
                     #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_UP:
                     #y = y - scale
-                    if does_piece_fit2(current_piece, x, y):
-                        y = y - scale
+                    #if does_piece_fit2(current_piece, x, y):
+                    #    y = y - scale
+                    rotate += 1
+                    if rotate > 3:
+                        rotate = 1
                     #update_play_field(tetris_surface, font, font2)
                     #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
