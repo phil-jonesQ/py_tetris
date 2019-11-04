@@ -21,8 +21,9 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 LIGHT_GREEN = (101, 152, 101)
 GREY = (128, 128, 128)
-YELLOW = (255,255,0)
-MAGENTA = (255,0,255)
+YELLOW = (255, 255, 0)
+MAGENTA = (255, 0, 255)
+ORANGE = (255, 165, 0)
 tetris_surface = pygame.display.set_mode((WindowWidth, WindowHeight))
 clock = pygame.time.Clock()
 MY_VERSION = "1.0"
@@ -39,65 +40,126 @@ L = ['....',
      '.X..',
      '.X..',
      '.XX.']
+L1 = ['....',
+      'XXX.',
+      'X...',
+      '....']
+L2 = ['....',
+      '.XX.',
+      '..X.',
+      '..X.']
+L3 = ['....',
+      '...X',
+      '.XXX',
+      '....']
+
+J = ['..X.',
+     '..X.',
+     '.XX.',
+     '....']
+J1 = ['....',
+      'X...',
+      'XXX.',
+      '....']
+J2 = ['....',
+      '.XX.',
+      '.X..',
+      '.X..']
+J3 = ['....',
+      '.XXX',
+      '...X',
+      '....']
 
 O = ['....',
      '.XX.',
      '.XX.',
      '....']
-
-Z = ['....',
-     '.X..',
-     '.XX.',
-     '..X.']
+O1 = ['....',
+      '.XX.',
+      '.XX.',
+      '....']
+O2 = ['....',
+      '.XX.',
+      '.XX.',
+      '....']
+O3 = ['....',
+      '.XX.',
+      '.XX.',
+      '....']
 
 T = ['....',
      '.X..',
      '.XX.',
      '.X..']
+T1 = ['....',
+      '.XXX',
+      '..X.',
+      '....']
+T2 = ['...X',
+      '..XX',
+      '...X',
+      '....']
+T3 = ['....',
+      '..X.',
+      '.XXX',
+      '....']
 
-I =  ['.X..',
+I = ['.X..',
+     '.X..',
+     '.X..',
+     '.X..']
+I1 = ['....',
+      'XXXX',
+      '....',
+      '....']
+I2 = ['.X..',
       '.X..',
       '.X..',
       '.X..']
+I3 = ['....',
+      'XXXX',
+      '....',
+      '....']
 
 S = ['....',
-      '..X.',
-      '.XX.',
-      '.X..']
-
-L1 = ['....',
-      '...X',
-      '.XXX',
-      '....']
-
-O1 = ['....',
-      '.XX.',
-      '.XX.',
-      '....']
-
-Z1 = ['....',
-      '.XX.',
-      '..XX',
-      '....']
-
-T1 = ['....',
-      '..X.',
-      '.XXX',
-      '....']
-
-I1 =  ['....',
-       '....',
-       '....',
-       'XXXX']
-
-
+     '..X.',
+     '.XX.',
+     '.X..']
 S1 = ['....',
       '..XX',
       '.XX.',
       '....']
+S2 = ['....',
+      '..X.',
+      '.XX.',
+      '.X..']
+S3 = ['....',
+      '..XX',
+      '.XX.',
+      '....']
 
-piece = [L, O, Z, T, I, S]
-piece1 = [L1, O1, Z1, T1, I1, S1]
+Z = ['....',
+     '.X..',
+     '.XX.',
+     '..X.']
+Z1 = ['....',
+      '.XX.',
+      '..XX',
+      '....']
+Z2 = ['....',
+      '.X..',
+      '.XX.',
+      '..X.']
+Z3 = ['....',
+      '.XX.',
+      '..XX',
+      '....']
+
+
+piece = [L, J, O, Z, T, I, S]
+piece1 = [L1, J1, O1, Z1, T1, I1, S1]
+piece2 = [L2, J2, O2, Z2, T2, I2, S2]
+piece3 = [L3, J3, O3, Z3, T3, I3, S3]
 
 
 def reset_game():
@@ -121,6 +183,8 @@ def colour_map(piece):
         colour = YELLOW
     if piece == 5:
         colour = MAGENTA
+    if piece == 6:
+        colour = ORANGE
     return colour
 
 
@@ -148,6 +212,17 @@ def draw_piece(surface, select, x, y, start, rotater):
                 if piece1[select][j][i] == "X":
                     pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
 
+    if rotater == 3:
+        for i in (range(4)):
+            for j in (range(4)):
+                if piece2[select][j][i] == "X":
+                    pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
+
+    if rotater == 4:
+        for i in (range(4)):
+            for j in (range(4)):
+                if piece3[select][j][i] == "X":
+                    pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
 
     # Update the screen
     pygame.display.flip()
@@ -187,8 +262,8 @@ def update_play_field(surface, font, font2):
 
 
 def select_piece():
-    piece_select = random.randrange(0, 6)
-    #piece_select = 1
+    piece_select = random.randrange(0, 7)
+    #piece_select = 6
     return piece_select
 
 
@@ -217,9 +292,9 @@ def remove_line(remove_row):
     ## Move all blocks down if space if free
     for i in (range(row)):
         for j in (range(col)):
-                if grid2[remove_row - i][j] != (0, 0, 0):
-                    grid2[remove_row][j] = grid2[remove_row - i][j]
-                    grid2[remove_row - i][j] = (0, 0, 0)
+            if grid2[remove_row - i][j] != (0, 0, 0):
+                grid2[remove_row][j] = grid2[remove_row - i][j]
+                grid2[remove_row - i][j] = (0, 0, 0)
 
 
 def freeze_piece(current_piece, x, y, rotater):
@@ -237,6 +312,16 @@ def freeze_piece(current_piece, x, y, rotater):
         for i in (range(4)):
             for j in (range(4)):
                 if piece1[current_piece][i][j] == "X":
+                    grid2[row + i][col + j] = (colour_map(current_piece))
+    if rotater == 3:
+        for i in (range(4)):
+            for j in (range(4)):
+                if piece2[current_piece][i][j] == "X":
+                    grid2[row + i][col + j] = (colour_map(current_piece))
+    if rotater == 4:
+        for i in (range(4)):
+            for j in (range(4)):
+                if piece3[current_piece][i][j] == "X":
                     grid2[row + i][col + j] = (colour_map(current_piece))
 
 
@@ -256,7 +341,7 @@ def does_piece_fit2(current_piece, x, y, rotater):
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
                     # Handle the first piece
-                    print (current_row)
+                    #print (current_row)
                     if current_row == 19:
                         next_piece = True
                     if current_col == 0:
@@ -271,7 +356,37 @@ def does_piece_fit2(current_piece, x, y, rotater):
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
                     # Handle the first piece
-                    print (current_row)
+                    #print (current_row)
+                    if current_row == 19:
+                        next_piece = True
+                    if current_col == 0:
+                        # print ("Edge")
+                        bound = "L"
+                    if current_col == 9:
+                        # print ("Edge")
+                        bound = "R"
+            if rotater == 3:
+                if piece2[current_piece][i][j] == "X":
+                    # print("In check " + str(i), str(j))
+                    current_col = int(((x) // scale) - 8) + j
+                    current_row = int(((y) // scale)) + i
+                    # Handle the first piece
+                    #print(current_row)
+                    if current_row == 19:
+                        next_piece = True
+                    if current_col == 0:
+                        # print ("Edge")
+                        bound = "L"
+                    if current_col == 9:
+                        # print ("Edge")
+                        bound = "R"
+            if rotater == 4:
+                if piece3[current_piece][i][j] == "X":
+                    # print("In check " + str(i), str(j))
+                    current_col = int(((x) // scale) - 8) + j
+                    current_row = int(((y) // scale)) + i
+                    # Handle the first piece
+                    #print(current_row)
                     if current_row == 19:
                         next_piece = True
                     if current_col == 0:
@@ -308,6 +423,30 @@ def does_piece_fit2(current_piece, x, y, rotater):
                                     next_piece = True
                                 else:
                                     overlap = False
+                        if rotater == 3:
+                            if piece2[current_piece][i][j] == "X":
+                                current_col = int(((x) // scale) - 8) + j
+                                current_row = int(((y) // scale)) + i
+                                # print("In check " + str(i), str(j))
+                                if r == current_row and c == current_col:
+                                    # print (r, c, current_row, current_col)
+                                    overlap = True
+                                    next_piece = True
+                                else:
+                                    overlap = False
+
+                        if rotater == 4:
+                            if piece3[current_piece][i][j] == "X":
+                                current_col = int(((x) // scale) - 8) + j
+                                current_row = int(((y) // scale)) + i
+                                # print("In check " + str(i), str(j))
+                                if r == current_row and c == current_col:
+                                    # print (r, c, current_row, current_col)
+                                    overlap = True
+                                    next_piece = True
+                                else:
+                                    overlap = False
+
 
 
     #print ("End check")
@@ -341,6 +480,7 @@ def main():
     fall = True
     rotate = 1
 
+    pygame.key.set_repeat(1, 100)  # use 10 as interval to speed things up.
     while loop:
         # Control FPS
         clock.tick(frame_rate)
@@ -379,46 +519,46 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    next_piece = False
-                    freeze_piece(current_piece, x, y, rotate)
-                    current_piece = select_piece()
-                    x = start_x
-                    y = start_y - scale * 2
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
-                    #print(grid)
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            next_piece = False
+            freeze_piece(current_piece, x, y, rotate)
+            current_piece = select_piece()
+            x = start_x
+            y = start_y - scale * 2
+            draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+            #print(grid)
 
-                if event.key == pygame.K_RIGHT:
-                        #x = x + scale
-                    if does_piece_fit2(current_piece, x - scale, y, rotate) or bound != "R":
-                        bound = "N"
-                        x = x + scale
-                    #update_play_field(tetris_surface, font, font2)
-                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
-                if event.key == pygame.K_LEFT:
-                    #x = x - scale
-                    if does_piece_fit2(current_piece, x + scale, y, rotate) or bound != "L":
-                        bound = "N"
-                        x = x - scale
-                    #does_piece_fit(current_piece, x, y)
-                    #update_play_field(tetris_surface, font, font2)
-                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
-                if event.key == pygame.K_DOWN:
-                    #y = y + scale
-                    if does_piece_fit2(current_piece, x, y, rotate) or bound == "N" or bound == "R" or bound == "L" or fall:
-                        y = y + scale
-                    #update_play_field(tetris_surface, font, font2)
-                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
-                if event.key == pygame.K_UP:
-                    #y = y - scale
-                    #if does_piece_fit2(current_piece, x, y):
-                    #    y = y - scale
-                    rotate += 1
-                    if rotate > 2:
-                        rotate = 1
-                    #update_play_field(tetris_surface, font, font2)
-                    #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+        if keys[pygame.K_RIGHT]:
+                #x = x + scale
+            if does_piece_fit2(current_piece, x - scale, y, rotate) or bound != "R":
+                bound = "N"
+                x = x + scale
+            #update_play_field(tetris_surface, font, font2)
+            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+        if keys[pygame.K_LEFT]:
+            #x = x - scale
+            if does_piece_fit2(current_piece, x + scale, y, rotate) or bound != "L":
+                bound = "N"
+                x = x - scale
+            #does_piece_fit(current_piece, x, y)
+            #update_play_field(tetris_surface, font, font2)
+            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+        if keys[pygame.K_DOWN]:
+            #y = y + scale
+            if does_piece_fit2(current_piece, x, y, rotate) or bound == "N" or bound == "R" or bound == "L" or fall:
+                y = y + scale
+            #update_play_field(tetris_surface, font, font2)
+            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+        if keys[pygame.K_UP]:
+            #y = y - scale
+            #if does_piece_fit2(current_piece, x, y):
+            #    y = y - scale
+            rotate += 1
+            if rotate > 4:
+                rotate = 1
+            #update_play_field(tetris_surface, font, font2)
+            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
 
 
