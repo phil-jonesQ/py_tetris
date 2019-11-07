@@ -166,7 +166,7 @@ def reset_game():
     global frame_rate, game_over, tetris_lines, level
     tetris_lines = 0
     game_over = False
-    frame_rate = 10
+    frame_rate = 5
     level = 1
 
 
@@ -341,60 +341,46 @@ def does_piece_fit2(current_piece, x, y, rotater):
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
                     # Handle the first piece
-                    #print (current_row)
-                    if current_row == 19:
+                    print (current_col)
+                    if current_row == 20:
                         next_piece = True
-                    if current_col == 0:
-                        # print ("Edge")
-                        bound = "L"
-                    if current_col == 9:
-                        # print ("Edge")
-                        bound = "R"
+                    if current_col == -2:
+                        return False
+                    if current_col == 11:
+                        return False
             if rotater == 2:
                 if piece1[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
-                    # Handle the first piece
-                    #print (current_row)
-                    if current_row == 19:
+                    if current_row == 20:
                         next_piece = True
-                    if current_col == 0:
-                        # print ("Edge")
-                        bound = "L"
-                    if current_col == 9:
-                        # print ("Edge")
-                        bound = "R"
+                    if current_col == -2:
+                        return False
+                    if current_col == 11:
+                        return False
             if rotater == 3:
                 if piece2[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
-                    # Handle the first piece
-                    #print(current_row)
-                    if current_row == 19:
+                    if current_row == 20:
                         next_piece = True
-                    if current_col == 0:
-                        # print ("Edge")
-                        bound = "L"
-                    if current_col == 9:
-                        # print ("Edge")
-                        bound = "R"
+                    if current_col == -2:
+                        return False
+                    if current_col == 11:
+                        return False
             if rotater == 4:
                 if piece3[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
-                    # Handle the first piece
-                    #print(current_row)
-                    if current_row == 19:
+                    if current_row == 20:
                         next_piece = True
-                    if current_col == 0:
-                        # print ("Edge")
-                        bound = "L"
-                    if current_col == 9:
-                        # print ("Edge")
-                        bound = "R"
+                    if current_col == -2:
+                        return False
+                    if current_col == 11:
+                        return False
     # Detect piece can fit
     for r in (range(row)):
         for c in (range(col)):
@@ -405,7 +391,7 @@ def does_piece_fit2(current_piece, x, y, rotater):
                             if piece[current_piece][i][j] == "X":
                                 current_col = int(((x) // scale) - 8) + j
                                 current_row = int(((y) // scale)) + i
-                                #print("In check " + str(i), str(j))
+                                #print("Checking background piece (r, c) " + str(r), str(c) + "Against The Falling " + str(current_row), str(current_col))
                                 if r == current_row and c == current_col:
                                     #print (r, c, current_row, current_col)
                                     overlap = True
@@ -450,7 +436,7 @@ def does_piece_fit2(current_piece, x, y, rotater):
 
 
     #print ("End check")
-    if overlap is True or bound == "R" or bound == "L":
+    if overlap is True:
         return False
     else:
         return True
@@ -480,11 +466,10 @@ def main():
     fall = True
     rotate = 1
 
-    pygame.key.set_repeat(1, 100)  # use 10 as interval to speed things up.
+    pygame.key.set_repeat(100, 10)  # use 10 as interval to speed things up.
     while loop:
         # Control FPS
         clock.tick(frame_rate)
-        #print (current_piece)
         # Spawn next piece
         if next_piece:
             next_piece = False
@@ -501,11 +486,10 @@ def main():
 
         # Make piece fall
         if fall:
-            if does_piece_fit2(current_piece, x, y, rotate) or bound == "N" or bound == "R" or bound == "L" or fall:
+            if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
                 y = y + scale
 
         # Check for a line
-
         check_line()
 
         # Check if lost
@@ -513,9 +497,6 @@ def main():
         # Check if piece fits
         does_piece_fit2(current_piece, x, y, rotate)
 
-        # Event handler
-        # Event handler
-        # Event handler
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -527,40 +508,22 @@ def main():
             x = start_x
             y = start_y - scale * 2
             draw_piece(tetris_surface, current_piece, x, y, False, rotate)
-            #print(grid)
 
         if keys[pygame.K_RIGHT]:
-                #x = x + scale
-            if does_piece_fit2(current_piece, x - scale, y, rotate) or bound != "R":
-                bound = "N"
+            if does_piece_fit2(current_piece, x + scale * 2, y, rotate):
                 x = x + scale
-            #update_play_field(tetris_surface, font, font2)
-            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
         if keys[pygame.K_LEFT]:
-            #x = x - scale
-            if does_piece_fit2(current_piece, x + scale, y, rotate) or bound != "L":
-                bound = "N"
+            if does_piece_fit2(current_piece, x - scale * 2, y, rotate):
                 x = x - scale
-            #does_piece_fit(current_piece, x, y)
-            #update_play_field(tetris_surface, font, font2)
-            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
         if keys[pygame.K_DOWN]:
-            #y = y + scale
-            if does_piece_fit2(current_piece, x, y, rotate) or bound == "N" or bound == "R" or bound == "L" or fall:
+            if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
                 y = y + scale
-            #update_play_field(tetris_surface, font, font2)
-            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
         if keys[pygame.K_UP]:
-            #y = y - scale
-            #if does_piece_fit2(current_piece, x, y):
-            #    y = y - scale
-            rotate += 1
-            if rotate > 4:
-                rotate = 1
-            #update_play_field(tetris_surface, font, font2)
-            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
-
-
+            #print (x)
+            if x > 220 and x < 460:
+                rotate += 1
+                if rotate > 4:
+                    rotate = 1
 
 
 # Call main
