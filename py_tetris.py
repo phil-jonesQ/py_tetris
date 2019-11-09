@@ -463,13 +463,25 @@ def main():
     global bound, next_piece, fall
     bound = "N"
     next_piece = False
-    fall = True
+    fall = False
     rotate = 1
+    fall_time = 0
+    fall_speed = 0.27
+    level_time = 0
 
-    pygame.key.set_repeat(100, 10)  # use 10 as interval to speed things up.
+    #pygame.key.set_repeat(100, 10)  # use 10 as interval to speed things up.
     while loop:
         # Control FPS
-        clock.tick(frame_rate)
+        fall_time += clock.get_rawtime()
+        level_time += clock.get_rawtime()
+        clock.tick()
+        # Control fall rate
+        if level_time / 1000 > 5:
+            level_time = 0
+            if level_time > 0.12:
+                level_time -= 0.005
+
+
         # Spawn next piece
         if next_piece:
             next_piece = False
@@ -485,9 +497,11 @@ def main():
         draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
         # Make piece fall
-        if fall:
-            if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
-                y = y + scale
+        if fall_time / 1000 > fall_speed:
+            fall_time = 0
+            if fall:
+                if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
+                    y = y + scale
 
         # Check for a line
         check_line()
@@ -510,7 +524,6 @@ def main():
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
                 if event.key == pygame.K_RIGHT:
-                    print ("right")
                     if does_piece_fit2(current_piece, x + scale * 2, y, rotate):
                         x = x + scale
                 if event.key == pygame.K_LEFT:
@@ -520,7 +533,6 @@ def main():
                     if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
                         y = y + scale
                 if event.key == pygame.K_UP:
-                    #print (x)
                     if x > 220 and x < 460:
                         rotate += 1
                         if rotate > 4:
