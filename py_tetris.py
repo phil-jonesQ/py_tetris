@@ -341,7 +341,7 @@ def does_piece_fit2(current_piece, x, y, rotater):
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
                     # Handle the first piece
-                    print (current_col)
+                    #print (current_col)
                     if current_row == 20:
                         next_piece = True
                     if current_col == -2:
@@ -466,7 +466,7 @@ def main():
     fall = True
     rotate = 1
     fall_time = 0
-    fall_speed = 0.27
+    fall_speed = 0.37
     level_time = 0
 
     #pygame.key.set_repeat(100, 10)  # use 10 as interval to speed things up.
@@ -480,7 +480,7 @@ def main():
             level_time = 0
             if level_time > 0.12:
                 level_time -= 0.005
-
+        print(level_time, fall_time)
 
         # Spawn next piece
         if next_piece:
@@ -490,7 +490,9 @@ def main():
             rotate = 1
             x = start_x
             y = start_y - scale * 2
-            draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+            # Update the display
+            #update_play_field(tetris_surface, font, font2)
+            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
         # Update the display
         update_play_field(tetris_surface, font, font2)
