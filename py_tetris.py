@@ -463,7 +463,7 @@ def main():
     global bound, next_piece, fall
     bound = "N"
     next_piece = False
-    fall = False
+    fall = True
     rotate = 1
     fall_time = 0
     fall_speed = 0.27
