@@ -500,30 +500,31 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]:
-            next_piece = False
-            freeze_piece(current_piece, x, y, rotate)
-            current_piece = select_piece()
-            x = start_x
-            y = start_y - scale * 2
-            draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+            if event.type == pygame.KEYDOWN:
+                if event.type == pygame.K_SPACE:
+                    next_piece = False
+                    freeze_piece(current_piece, x, y, rotate)
+                    current_piece = select_piece()
+                    x = start_x
+                    y = start_y - scale * 2
+                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
-        if keys[pygame.K_RIGHT]:
-            if does_piece_fit2(current_piece, x + scale * 2, y, rotate):
-                x = x + scale
-        if keys[pygame.K_LEFT]:
-            if does_piece_fit2(current_piece, x - scale * 2, y, rotate):
-                x = x - scale
-        if keys[pygame.K_DOWN]:
-            if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
-                y = y + scale
-        if keys[pygame.K_UP]:
-            #print (x)
-            if x > 220 and x < 460:
-                rotate += 1
-                if rotate > 4:
-                    rotate = 1
+                if event.key == pygame.K_RIGHT:
+                    print ("right")
+                    if does_piece_fit2(current_piece, x + scale * 2, y, rotate):
+                        x = x + scale
+                if event.key == pygame.K_LEFT:
+                    if does_piece_fit2(current_piece, x - scale * 2, y, rotate):
+                        x = x - scale
+                if event.key == pygame.K_DOWN:
+                    if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
+                        y = y + scale
+                if event.key == pygame.K_UP:
+                    #print (x)
+                    if x > 220 and x < 460:
+                        rotate += 1
+                        if rotate > 4:
+                            rotate = 1
 
 
 # Call main
