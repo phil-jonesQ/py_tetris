@@ -169,6 +169,28 @@ def reset_game():
     frame_rate = 5
     level = 1
 
+def score_to_level_map(tetris_lines):
+    global level
+    if tetris_lines > 3:
+        level = 1
+    if tetris_lines > 6:
+        level = 2
+    if tetris_lines > 9:
+        level = 3
+    if tetris_lines > 12:
+        level = 4
+    if tetris_lines > 15:
+        level = 5
+    if tetris_lines > 18:
+        level = 6
+    if tetris_lines > 21:
+        level = 7
+    if tetris_lines > 24:
+        level = 8
+    if tetris_lines > 27:
+        level = 9
+    return level
+
 
 def colour_map(piece):
     if piece == 0:
@@ -246,6 +268,8 @@ def update_play_field(surface, font, font2):
                 sy = (start_y + (i * scale))
                 pygame.draw.rect(surface, GREY, (sx, sy, scale - 2, scale - 2))
 
+    # Map level
+    level = score_to_level_map(tetris_lines)
     # Update Display for user
     text = font.render("SCORE " + str(tetris_lines), True, WHITE)
     text2 = font.render("LEVEL " + str(level), True, WHITE)
@@ -268,6 +292,7 @@ def select_piece():
 
 
 def check_line():
+    global tetris_lines
     row = 20
     col = 10
     for i in (range(row)):
@@ -279,6 +304,7 @@ def check_line():
                         hit_count += 1
                 if hit_count == 10:
                     print ("Calling remove row on " + str(i))
+                    tetris_lines += 1
                     remove_line(i)
 
 
@@ -325,7 +351,7 @@ def freeze_piece(current_piece, x, y, rotater):
                     grid2[row + i][col + j] = (colour_map(current_piece))
 
 
-def does_piece_fit2(current_piece, x, y, rotater):
+def does_piece_fit2(current_piece, x, y, rotater, dir):
     # Convert the x / y to row col
     global bound, next_piece
     overlap = False
@@ -342,44 +368,44 @@ def does_piece_fit2(current_piece, x, y, rotater):
                     current_row = int(((y) // scale)) + i
                     # Handle the first piece
                     #print (current_col)
-                    if current_row == 20:
+                    if current_row == 19:
                         next_piece = True
-                    if current_col == -2:
+                    if current_col == -1:
                         return False
-                    if current_col == 11:
+                    if current_col == 10:
                         return False
             if rotater == 2:
                 if piece1[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
-                    if current_row == 20:
+                    if current_row == 19:
                         next_piece = True
-                    if current_col == -2:
+                    if current_col == -1:
                         return False
-                    if current_col == 11:
+                    if current_col == 10:
                         return False
             if rotater == 3:
                 if piece2[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
-                    if current_row == 20:
+                    if current_row == 19:
                         next_piece = True
-                    if current_col == -2:
+                    if current_col == -1:
                         return False
-                    if current_col == 11:
+                    if current_col == 10:
                         return False
             if rotater == 4:
                 if piece3[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
-                    if current_row == 20:
+                    if current_row == 19:
                         next_piece = True
-                    if current_col == -2:
+                    if current_col == -1:
                         return False
-                    if current_col == 11:
+                    if current_col == 10:
                         return False
     # Detect piece can fit
     for r in (range(row)):
@@ -394,10 +420,10 @@ def does_piece_fit2(current_piece, x, y, rotater):
                                 #print("Checking background piece (r, c) " + str(r), str(c) + "Against The Falling " + str(current_row), str(current_col))
                                 if r == current_row and c == current_col:
                                     #print (r, c, current_row, current_col)
-                                    overlap = True
-                                    next_piece = True
-                                else:
-                                    overlap = False
+                                    if not dir:
+                                        next_piece = True
+                                    return False
+
                         if rotater == 2:
                             if piece1[current_piece][i][j] == "X":
                                 current_col = int(((x) // scale) - 8) + j
@@ -405,10 +431,10 @@ def does_piece_fit2(current_piece, x, y, rotater):
                                 # print("In check " + str(i), str(j))
                                 if r == current_row and c == current_col:
                                     # print (r, c, current_row, current_col)
-                                    overlap = True
-                                    next_piece = True
-                                else:
-                                    overlap = False
+                                    if not dir:
+                                        next_piece = True
+                                    return False
+
                         if rotater == 3:
                             if piece2[current_piece][i][j] == "X":
                                 current_col = int(((x) // scale) - 8) + j
@@ -416,10 +442,10 @@ def does_piece_fit2(current_piece, x, y, rotater):
                                 # print("In check " + str(i), str(j))
                                 if r == current_row and c == current_col:
                                     # print (r, c, current_row, current_col)
-                                    overlap = True
-                                    next_piece = True
-                                else:
-                                    overlap = False
+                                    if not dir:
+                                        next_piece = True
+                                    return False
+
 
                         if rotater == 4:
                             if piece3[current_piece][i][j] == "X":
@@ -428,18 +454,12 @@ def does_piece_fit2(current_piece, x, y, rotater):
                                 # print("In check " + str(i), str(j))
                                 if r == current_row and c == current_col:
                                     # print (r, c, current_row, current_col)
-                                    overlap = True
-                                    next_piece = True
-                                else:
-                                    overlap = False
+                                    if not dir:
+                                        next_piece = True
+                                    return False
 
 
-
-    #print ("End check")
-    if overlap is True:
-        return False
-    else:
-        return True
+    return True
 
 
 def main():
@@ -464,6 +484,7 @@ def main():
     bound = "N"
     next_piece = False
     fall = True
+    directional = False
     rotate = 1
     fall_time = 0
     fall_speed = 0.37
@@ -480,7 +501,7 @@ def main():
             level_time = 0
             if level_time > 0.12:
                 level_time -= 0.005
-        print(level_time, fall_time)
+        #print(level_time, fall_time)
 
         # Spawn next piece
         if next_piece:
@@ -490,9 +511,7 @@ def main():
             rotate = 1
             x = start_x
             y = start_y - scale * 2
-            # Update the display
-            #update_play_field(tetris_surface, font, font2)
-            #draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+
 
         # Update the display
         update_play_field(tetris_surface, font, font2)
@@ -502,7 +521,8 @@ def main():
         if fall_time / 1000 > fall_speed:
             fall_time = 0
             if fall:
-                if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
+                directional = False
+                if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                     y = y + scale
 
         # Check for a line
@@ -511,13 +531,13 @@ def main():
         # Check if lost
 
         # Check if piece fits
-        does_piece_fit2(current_piece, x, y, rotate)
+        does_piece_fit2(current_piece, x, y, rotate, directional)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                if event.type == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE:
                     next_piece = False
                     freeze_piece(current_piece, x, y, rotate)
                     current_piece = select_piece()
@@ -526,13 +546,16 @@ def main():
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
                 if event.key == pygame.K_RIGHT:
-                    if does_piece_fit2(current_piece, x + scale * 2, y, rotate):
+                    directional = True
+                    if does_piece_fit2(current_piece, x + scale, y, rotate, directional):
                         x = x + scale
                 if event.key == pygame.K_LEFT:
-                    if does_piece_fit2(current_piece, x - scale * 2, y, rotate):
+                    directional = True
+                    if does_piece_fit2(current_piece, x - scale, y, rotate, directional):
                         x = x - scale
                 if event.key == pygame.K_DOWN:
-                    if does_piece_fit2(current_piece, x, y + scale * 2, rotate):
+                    directional = False
+                    if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         y = y + scale
                 if event.key == pygame.K_UP:
                     if x > 220 and x < 460:
