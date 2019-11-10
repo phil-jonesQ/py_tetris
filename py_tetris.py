@@ -287,7 +287,7 @@ def update_play_field(surface, font, font2):
 
 def select_piece():
     piece_select = random.randrange(0, 7)
-    #piece_select = 6
+    piece_select = 5
     return piece_select
 
 
@@ -306,6 +306,7 @@ def check_line():
                     print ("Calling remove row on " + str(i))
                     tetris_lines += 1
                     remove_line(i)
+                    shift_down(i)
 
 
 def remove_line(remove_row):
@@ -313,14 +314,17 @@ def remove_line(remove_row):
     ## Clear row
     for j in (range(col)):
         grid2[remove_row][j] = (0, 0, 0)
-    row = 8
-    col = 10
     ## Move all blocks down if space if free
-    for i in (range(row)):
+    #for i in (range(row)):
+
+def shift_down(target_row):
+    col = 10
+    for i in (range(8)):
         for j in (range(col)):
-            if grid2[remove_row - i][j] != (0, 0, 0):
-                grid2[remove_row][j] = grid2[remove_row - i][j]
-                grid2[remove_row - i][j] = (0, 0, 0)
+            if grid2[(target_row - 1) - i][j] != (0, 0, 0):
+                print ("Target row is " + str((target_row - 1) - i))
+                grid2[(target_row - 1) - i][j] = grid2[target_row - 1][j]
+        #grid2[remove_row - 1][j] = (0, 0, 0)
 
 
 def freeze_piece(current_piece, x, y, rotater):
@@ -349,6 +353,9 @@ def freeze_piece(current_piece, x, y, rotater):
             for j in (range(4)):
                 if piece3[current_piece][i][j] == "X":
                     grid2[row + i][col + j] = (colour_map(current_piece))
+
+    ## Finally check for any lines
+    check_line()
 
 
 def does_piece_fit2(current_piece, x, y, rotater, dir):
@@ -526,7 +533,7 @@ def main():
                     y = y + scale
 
         # Check for a line
-        check_line()
+        #check_line()
 
         # Check if lost
 
