@@ -287,7 +287,7 @@ def update_play_field(surface, font, font2):
 
 def select_piece():
     piece_select = random.randrange(0, 7)
-    piece_select = 5
+    piece_select = 2
     return piece_select
 
 
@@ -295,6 +295,7 @@ def check_line():
     global tetris_lines
     row = 20
     col = 10
+    lines_to_remove = 0
     for i in (range(row)):
         for j in (range(col)):
             if grid2[i][j] != (0, 0, 0):
@@ -303,6 +304,7 @@ def check_line():
                     if grid2[i][b] != (0, 0, 0):
                         hit_count += 1
                 if hit_count == 10:
+                    lines_to_remove += 1
                     print ("Calling remove row on " + str(i))
                     tetris_lines += 1
                     remove_line(i)
@@ -317,13 +319,31 @@ def remove_line(remove_row):
     ## Move all blocks down if space if free
     #for i in (range(row)):
 
-def shift_down(target_row):
+
+def shift_down(remove_row):
+    repeat = 0
     col = 10
-    for i in (range(8)):
+    row = 20
+
+    for i in (range(row)):
         for j in (range(col)):
-            if grid2[(target_row - 1) - i][j] != (0, 0, 0):
-                print ("Target row is " + str((target_row - 1) - i))
-                grid2[(target_row - 1) - i][j] = grid2[target_row - 1][j]
+
+            if grid2[remove_row - i][j] != (0, 0, 0):
+                print("the remove_row " + str(remove_row - i) + "not equal empty")
+                print ("the row that was deleted now is set to the previous row")
+                grid2[remove_row][j] = grid2[remove_row - i][j]
+                print ("Now it is set to all blank")
+                grid2[remove_row - i][j] = (0, 0, 0)
+
+    #for i in (range(row)):
+        #for j in (range(col)):
+            #if grid2[i][j] != (0, 0, 0):
+                #while repeat < 4:
+                    #repeat += 1
+                    #print("Move Row " + str(i) + " To Row " + str(i + 1))
+                    #if grid2[i + 1][j] == (0, 0, 0):
+                        #grid2[i + 1][j] = grid2[i][j]
+                        #grid2[i][j] = (0, 0, 0)
         #grid2[remove_row - 1][j] = (0, 0, 0)
 
 
