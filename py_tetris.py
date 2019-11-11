@@ -2,6 +2,14 @@
 Phil Jones September 2019 - phil.jones.24.4@gmail.com
 October 28 - Can now control pieces and freeze them, this stores them in the master array as block and colour
 This should make collision detection and line detection easier etc
+V1.01 November 11 2019
+Working version of the game - to do
+* Next piece preview
+* Detect when die
+* Start splash screen
+* Game over splash screen
+* Fire piece down
+* Increase speed with level
 """
 
 import pygame
@@ -26,7 +34,7 @@ MAGENTA = (255, 0, 255)
 ORANGE = (255, 165, 0)
 tetris_surface = pygame.display.set_mode((WindowWidth, WindowHeight))
 clock = pygame.time.Clock()
-MY_VERSION = "1.0"
+MY_VERSION = "1.01"
 top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
 scale = 30
@@ -169,6 +177,7 @@ def reset_game():
     frame_rate = 5
     level = 1
 
+
 def score_to_level_map(tetris_lines):
     global level
     if tetris_lines > 3:
@@ -212,8 +221,6 @@ def colour_map(piece):
 
 def draw_piece(surface, select, x, y, start, rotater):
     colour = colour_map(select)
-
-    #print(rotater)
 
     if start:
         sx = start_x
@@ -287,7 +294,7 @@ def update_play_field(surface, font, font2):
 
 def select_piece():
     piece_select = random.randrange(0, 7)
-    #piece_select = 4
+    #piece_select = 1
     return piece_select
 
 
@@ -317,12 +324,6 @@ def remove_line(remove_row):
     for j in (range(col)):
         grid2[remove_row][j] = (0, 0, 0)
 
-#row 15## ############
-#row 16### ###########
-#row 17######## #  #
-#row 18################################# ##
-#row 19####################################XXX row 19 is removed so row 18 is 19, row 17 is 18, row 16 is 17, row 15 is 16 and so on
-# so algroithm is starting from the row you just removed itterate back and make 18 19, 17 18, 16 17, 15 16 and so on
 
 def shift_down(remove_row):
     start_row = remove_row
@@ -330,22 +331,15 @@ def shift_down(remove_row):
     end_row = 1
     col = 10
 
-    back = 1
-    print (start_row, end_row)
     for i in (range(start_row, end_row, -1)):
         for j in (range(col)):
-            #print (i)
             if grid2[i][j] != (0, 0, 0):
-                print("Moving row " + str(i) + " coloumn " + str(j) + " to row " + str(i + 1) + " column " + str(j))
-                #print (" so setting the remove row " + str(remove_row) + " to " + str(remove_row - back))
+                # print("Moving row " + str(i) + " coloumn " + str(j) + " to row " + str(i + 1) + " column " + str(j))
                 grid2[i + 1][j] = grid2[i][j]
-                #print ("Now it is set to all blank for " + str(remove_row - i))
-                grid2[i - 1][j] = (0, 0, 0)
-
+                grid2[i][j] = (0, 0, 0)
 
 
 def freeze_piece(current_piece, x, y, rotater):
-    #print (rotater)
     # Convert the x / y to row col
     col = int(((x - start_x) // scale) + 5)
     row = int(((y - start_y) // scale))
@@ -371,14 +365,10 @@ def freeze_piece(current_piece, x, y, rotater):
                 if piece3[current_piece][i][j] == "X":
                     grid2[row + i][col + j] = (colour_map(current_piece))
 
-    ## Finally check for any lines
-    #check_line()
-
 
 def does_piece_fit2(current_piece, x, y, rotater, dir):
     # Convert the x / y to row col
-    global bound, next_piece
-    overlap = False
+    global next_piece
     row = 20
     col = 10
 
@@ -391,9 +381,9 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
                     # Handle the first piece
-                    #print (current_col)
                     if current_row == 19:
-                        next_piece = True
+                        if not dir:
+                            next_piece = True
                     if current_col == -1:
                         return False
                     if current_col == 10:
@@ -401,10 +391,11 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
             if rotater == 2:
                 if piece1[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
-                    current_col = int(((x) // scale) - 8) + j
-                    current_row = int(((y) // scale)) + i
+                    current_col = int((x // scale) - 8) + j
+                    current_row = int((y // scale)) + i
                     if current_row == 19:
-                        next_piece = True
+                        if not dir:
+                            next_piece = True
                     if current_col == -1:
                         return False
                     if current_col == 10:
@@ -412,10 +403,11 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
             if rotater == 3:
                 if piece2[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
-                    current_col = int(((x) // scale) - 8) + j
-                    current_row = int(((y) // scale)) + i
+                    current_col = int((x // scale) - 8) + j
+                    current_row = int((y // scale)) + i
                     if current_row == 19:
-                        next_piece = True
+                        if not dir:
+                            next_piece = True
                     if current_col == -1:
                         return False
                     if current_col == 10:
@@ -423,10 +415,11 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
             if rotater == 4:
                 if piece3[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
-                    current_col = int(((x) // scale) - 8) + j
-                    current_row = int(((y) // scale)) + i
+                    current_col = int((x // scale) - 8) + j
+                    current_row = int((y // scale)) + i
                     if current_row == 19:
-                        next_piece = True
+                        if not dir:
+                            next_piece = True
                     if current_col == -1:
                         return False
                     if current_col == 10:
@@ -439,8 +432,8 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
                     for j in (range(4)):
                         if rotater == 1:
                             if piece[current_piece][i][j] == "X":
-                                current_col = int(((x) // scale) - 8) + j
-                                current_row = int(((y) // scale)) + i
+                                current_col = int((x // scale) - 8) + j
+                                current_row = int((y // scale)) + i
                                 #print("Checking background piece (r, c) " + str(r), str(c) + "Against The Falling " + str(current_row), str(current_col))
                                 if r == current_row and c == current_col:
                                     #print (r, c, current_row, current_col)
@@ -450,8 +443,8 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
 
                         if rotater == 2:
                             if piece1[current_piece][i][j] == "X":
-                                current_col = int(((x) // scale) - 8) + j
-                                current_row = int(((y) // scale)) + i
+                                current_col = int((x // scale) - 8) + j
+                                current_row = int((y // scale)) + i
                                 # print("In check " + str(i), str(j))
                                 if r == current_row and c == current_col:
                                     # print (r, c, current_row, current_col)
@@ -461,27 +454,25 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
 
                         if rotater == 3:
                             if piece2[current_piece][i][j] == "X":
-                                current_col = int(((x) // scale) - 8) + j
-                                current_row = int(((y) // scale)) + i
+                                current_col = int((x // scale) - 8) + j
+                                current_row = int((y // scale)) + i
                                 # print("In check " + str(i), str(j))
                                 if r == current_row and c == current_col:
                                     # print (r, c, current_row, current_col)
                                     if not dir:
                                         next_piece = True
                                     return False
-
 
                         if rotater == 4:
                             if piece3[current_piece][i][j] == "X":
-                                current_col = int(((x) // scale) - 8) + j
-                                current_row = int(((y) // scale)) + i
+                                current_col = int((x // scale) - 8) + j
+                                current_row = int((y // scale)) + i
                                 # print("In check " + str(i), str(j))
                                 if r == current_row and c == current_col:
                                     # print (r, c, current_row, current_col)
                                     if not dir:
                                         next_piece = True
                                     return False
-
 
     return True
 
@@ -504,8 +495,7 @@ def main():
     update_play_field(tetris_surface, font, font2)
     draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
-    global bound, next_piece, fall
-    bound = "N"
+    global next_piece, fall
     next_piece = False
     fall = True
     directional = False
@@ -514,7 +504,6 @@ def main():
     fall_speed = 0.37
     level_time = 0
 
-    #pygame.key.set_repeat(100, 10)  # use 10 as interval to speed things up.
     while loop:
         # Control FPS
         fall_time += clock.get_rawtime()
@@ -525,7 +514,6 @@ def main():
             level_time = 0
             if level_time > 0.12:
                 level_time -= 0.005
-        #print(level_time, fall_time)
 
         # Spawn next piece
         if next_piece:
@@ -535,7 +523,6 @@ def main():
             rotate = 1
             x = start_x
             y = start_y - scale * 2
-
 
         # Update the display
         update_play_field(tetris_surface, font, font2)
