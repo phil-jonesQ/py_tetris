@@ -287,7 +287,7 @@ def update_play_field(surface, font, font2):
 
 def select_piece():
     piece_select = random.randrange(0, 7)
-    piece_select = 2
+    #piece_select = 4
     return piece_select
 
 
@@ -296,7 +296,7 @@ def check_line():
     row = 20
     col = 10
     lines_to_remove = 0
-    for i in (range(row)):
+    for i in (range(row, 1, -1)):
         for j in (range(col)):
             if grid2[i][j] != (0, 0, 0):
                 hit_count = 0
@@ -316,35 +316,32 @@ def remove_line(remove_row):
     ## Clear row
     for j in (range(col)):
         grid2[remove_row][j] = (0, 0, 0)
-    ## Move all blocks down if space if free
-    #for i in (range(row)):
 
+#row 15## ############
+#row 16### ###########
+#row 17######## #  #
+#row 18################################# ##
+#row 19####################################XXX row 19 is removed so row 18 is 19, row 17 is 18, row 16 is 17, row 15 is 16 and so on
+# so algroithm is starting from the row you just removed itterate back and make 18 19, 17 18, 16 17, 15 16 and so on
 
 def shift_down(remove_row):
-    repeat = 0
-    col = 10
+    start_row = remove_row
     row = 20
+    end_row = 1
+    col = 10
 
-    for i in (range(row)):
+    back = 1
+    print (start_row, end_row)
+    for i in (range(start_row, end_row, -1)):
         for j in (range(col)):
+            #print (i)
+            if grid2[i][j] != (0, 0, 0):
+                print("Moving row " + str(i) + " coloumn " + str(j) + " to row " + str(i + 1) + " column " + str(j))
+                #print (" so setting the remove row " + str(remove_row) + " to " + str(remove_row - back))
+                grid2[i + 1][j] = grid2[i][j]
+                #print ("Now it is set to all blank for " + str(remove_row - i))
+                grid2[i - 1][j] = (0, 0, 0)
 
-            if grid2[remove_row - i][j] != (0, 0, 0):
-                print("the remove_row " + str(remove_row - i) + "not equal empty")
-                print ("the row that was deleted now is set to the previous row")
-                grid2[remove_row][j] = grid2[remove_row - i][j]
-                print ("Now it is set to all blank")
-                grid2[remove_row - i][j] = (0, 0, 0)
-
-    #for i in (range(row)):
-        #for j in (range(col)):
-            #if grid2[i][j] != (0, 0, 0):
-                #while repeat < 4:
-                    #repeat += 1
-                    #print("Move Row " + str(i) + " To Row " + str(i + 1))
-                    #if grid2[i + 1][j] == (0, 0, 0):
-                        #grid2[i + 1][j] = grid2[i][j]
-                        #grid2[i][j] = (0, 0, 0)
-        #grid2[remove_row - 1][j] = (0, 0, 0)
 
 
 def freeze_piece(current_piece, x, y, rotater):
@@ -375,7 +372,7 @@ def freeze_piece(current_piece, x, y, rotater):
                     grid2[row + i][col + j] = (colour_map(current_piece))
 
     ## Finally check for any lines
-    check_line()
+    #check_line()
 
 
 def does_piece_fit2(current_piece, x, y, rotater, dir):
@@ -553,7 +550,7 @@ def main():
                     y = y + scale
 
         # Check for a line
-        #check_line()
+        check_line()
 
         # Check if lost
 
