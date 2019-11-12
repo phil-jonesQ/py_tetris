@@ -294,7 +294,7 @@ def update_play_field(surface, font, font2):
 
 def select_piece():
     piece_select = random.randrange(0, 7)
-    #piece_select = 1
+    #piece_select = 5
     return piece_select
 
 
@@ -381,9 +381,10 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
                     current_col = int(((x) // scale) - 8) + j
                     current_row = int(((y) // scale)) + i
                     # Handle the first piece
-                    if current_row == 19:
+                    if current_row > 19:
                         if not dir:
                             next_piece = True
+                            return False
                     if current_col == -1:
                         return False
                     if current_col == 10:
@@ -393,9 +394,10 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
                     # print("In check " + str(i), str(j))
                     current_col = int((x // scale) - 8) + j
                     current_row = int((y // scale)) + i
-                    if current_row == 19:
+                    if current_row > 19:
                         if not dir:
                             next_piece = True
+                            return False
                     if current_col == -1:
                         return False
                     if current_col == 10:
@@ -405,9 +407,10 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
                     # print("In check " + str(i), str(j))
                     current_col = int((x // scale) - 8) + j
                     current_row = int((y // scale)) + i
-                    if current_row == 19:
+                    if current_row > 19:
                         if not dir:
                             next_piece = True
+                            return False
                     if current_col == -1:
                         return False
                     if current_col == 10:
@@ -417,9 +420,10 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
                     # print("In check " + str(i), str(j))
                     current_col = int((x // scale) - 8) + j
                     current_row = int((y // scale)) + i
-                    if current_row == 19:
+                    if current_row > 19:
                         if not dir:
                             next_piece = True
+                            return False
                     if current_col == -1:
                         return False
                     if current_col == 10:
