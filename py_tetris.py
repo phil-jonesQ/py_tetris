@@ -306,10 +306,10 @@ def generate_sequence():
     # generates a list of 16 random numbers
     # later versions can include a more intelligent random generator
     # eg no repetition allowed - or more of certain shapes, etc, etc
-    piece_sequence = [random.randrange(0, 7) for i in range(16)]
+    piece_sequence = [random.randrange(0, 7) for i in range(17)]
     # Predictive pattern for debugging
     #piece_sequence = [0, 1, 2, 3, 4, 5, 6, 5, 6, 5, 4, 3, 2, 1, 0, 5]
-    #print (piece_sequence)
+    print (piece_sequence)
     return piece_sequence
 
 
@@ -558,12 +558,19 @@ def main():
 
             # Handle the random sequence index and reset back to 0 after sequence 15 and generate a new batch of numbers
             next_piece_index += 1
-            if next_piece_index > 14:
+            if next_piece_index > 15:
                 next_piece_index = 0
+                # Store the old sequence before generating a new one
+                piece_sequence_old = piece_sequence
                 piece_sequence = generate_sequence()
-
-            next_up = piece_sequence[next_piece_index + 1]
-            current_piece = piece_sequence[next_piece_index]
+                # start on the 2nd number of new seq so we can..
+                next_up = piece_sequence[next_piece_index + 1]
+                # recall back the last number in previous seq
+                current_piece = piece_sequence_old[16]
+            else:
+                next_up = piece_sequence[next_piece_index + 1]
+                current_piece = piece_sequence[next_piece_index]
+            print(current_piece, next_up)
             rotate = 1
             x = start_x
             y = start_y - scale * 2
