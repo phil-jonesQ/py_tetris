@@ -42,7 +42,8 @@ offset = 45
 start_x = WindowWidth / 2
 start_y = WindowHeight / 2 - scale * 11
 
-
+# Define multi dimensional array assets
+# All rotations defined
 
 L = ['....',
      '.X..',
@@ -163,6 +164,7 @@ Z3 = ['....',
       '..XX',
       '....']
 
+# Define each asset group as a piece array
 
 piece = [L, J, O, Z, T, I, S]
 piece1 = [L1, J1, O1, Z1, T1, I1, S1]
@@ -172,7 +174,8 @@ piece3 = [L3, J3, O3, Z3, T3, I3, S3]
 
 def reset_game():
     global frame_rate, game_over, tetris_lines, level, next_piece, fall, grid2, piece_sequence, next_piece_index
-    piece_sequence = [random.randrange(0, 7) for i in range(1000)]
+    #piece_sequence = [random.randrange(0, 7) for i in range(7)]
+    piece_sequence = generate_sequence()
     next_piece_index = 0
     grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
     tetris_lines = 0
@@ -265,7 +268,6 @@ def draw_piece(surface, select, x, y, start, rotater):
 def update_play_field(surface, font, font2, next_up):
     # Update screen
     tetris_surface.fill(BLACK)
-
     # Draw historic pieces and grid space
     row = 20
     col = 10
@@ -300,10 +302,15 @@ def update_play_field(surface, font, font2, next_up):
     pygame.display.flip()
 
 
-def select_piece():
-    piece_select = random.randrange(0, 7)
-    #piece_select = 5
-    return piece_select
+def generate_sequence():
+    # generates a list of 16 random numbers
+    # later versions can include a more intelligent random generator
+    # eg no repetition allowed - or more of certain shapes, etc, etc
+    piece_sequence = [random.randrange(0, 7) for i in range(16)]
+    # Predictive pattern for debugging
+    #piece_sequence = [0, 1, 2, 3, 4, 5, 6, 5, 6, 5, 4, 3, 2, 1, 0, 5]
+    #print (piece_sequence)
+    return piece_sequence
 
 
 def check_line():
@@ -320,7 +327,7 @@ def check_line():
                         hit_count += 1
                 if hit_count == 10:
                     lines_to_remove += 1
-                    print ("Calling remove row on " + str(i))
+                    #print ("Calling remove row on " + str(i))
                     tetris_lines += 1
                     remove_line(i)
                     shift_down(i)
@@ -357,6 +364,7 @@ def freeze_piece(current_piece, x, y, rotater):
     if row < 1:
         game_over = True
         fall = False
+
     # Freeze the piece in the master grid array recording it's colour
     if rotater == 1:
         for i in (range(4)):
@@ -496,9 +504,21 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
 
 
 def main():
+    # Declare Global Vars
+    global next_piece, fall, game_over, piece_sequence, next_piece_index
+
+    # Call reset of main variables
     reset_game()
     loop = True
-    # Declare Global Vars
+
+    # Local vars
+    directional = False
+    rotate = 1
+    fall_time = 0
+    fall_speed = 0.37
+    level_time = 0
+
+    # Pygame stuff
     pygame.init()
     pygame.display.set_caption("Tetris " + MY_VERSION)
 
@@ -509,18 +529,13 @@ def main():
     # Initialise the display
     x = start_x - scale * 2
     y = start_y - scale * 2
-    current_piece = select_piece()
-    update_play_field(tetris_surface, font, font2, 1)
+    current_piece = piece_sequence[next_piece_index]
+    next_up = piece_sequence[next_piece_index + 1]
+
+    update_play_field(tetris_surface, font, font2, next_up)
     draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
-    global next_piece, fall, game_over, piece_sequence, next_piece_index
-    # Local vars
-    directional = False
-    rotate = 1
-    fall_time = 0
-    fall_speed = 0.37
-    level_time = 0
-    next_up = 1
+
 
     while loop:
         # Control FPS
@@ -535,11 +550,18 @@ def main():
 
         # Spawn next piece
         if next_piece and not game_over:
-            next_piece_index += 1
-            if next_piece_index > 999:
-                next_piece_index = 0
+            # Set the next piece flag to false
             next_piece = False
+
+            # Freeze current piece
             freeze_piece(current_piece, x, y, rotate)
+
+            # Handle the random sequence index and reset back to 0 after sequence 15 and generate a new batch of numbers
+            next_piece_index += 1
+            if next_piece_index > 14:
+                next_piece_index = 0
+                piece_sequence = generate_sequence()
+
             next_up = piece_sequence[next_piece_index + 1]
             current_piece = piece_sequence[next_piece_index]
             rotate = 1
@@ -560,8 +582,6 @@ def main():
 
         # Check for a line
         check_line()
-
-        # Check if lost
 
         # Check if piece fits
         does_piece_fit2(current_piece, x, y, rotate, directional)
@@ -597,6 +617,10 @@ def main():
                             rotate = 1
                 if event.key == pygame.K_r and game_over:
                     reset_game()
+                    current_piece = piece_sequence[next_piece_index]
+                    next_up = piece_sequence[next_piece_index + 1]
+                    update_play_field(tetris_surface, font, font2, next_up)
+                    draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
 # Call main
 main()
