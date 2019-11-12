@@ -4,10 +4,10 @@ October 28 - Can now control pieces and freeze them, this stores them in the mas
 This should make collision detection and line detection easier etc
 V1.01 November 11 2019
 Working version of the game - to do
-* Next piece preview
-* Detect when die
+* Next piece preview - V1.02
+* Detect when die - v1.03
 * Start splash screen
-* Game over splash screen
+* Game over splash screen - V1.04
 * Fire piece down
 * Increase speed with level
 """
@@ -42,7 +42,7 @@ offset = 45
 start_x = WindowWidth / 2
 start_y = WindowHeight / 2 - scale * 11
 
-grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
+
 
 L = ['....',
      '.X..',
@@ -171,11 +171,16 @@ piece3 = [L3, J3, O3, Z3, T3, I3, S3]
 
 
 def reset_game():
-    global frame_rate, game_over, tetris_lines, level
+    global frame_rate, game_over, tetris_lines, level, next_piece, fall, grid2, piece_sequence, next_piece_index
+    piece_sequence = [random.randrange(0, 7) for i in range(1000)]
+    next_piece_index = 0
+    grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
     tetris_lines = 0
     game_over = False
     frame_rate = 5
     level = 1
+    next_piece = False
+    fall = True
 
 
 def score_to_level_map(tetris_lines):
@@ -257,7 +262,7 @@ def draw_piece(surface, select, x, y, start, rotater):
     pygame.display.flip()
 
 
-def update_play_field(surface, font, font2):
+def update_play_field(surface, font, font2, next_up):
     # Update screen
     tetris_surface.fill(BLACK)
 
@@ -280,14 +285,17 @@ def update_play_field(surface, font, font2):
     # Update Display for user
     text = font.render("SCORE " + str(tetris_lines), True, WHITE)
     text2 = font.render("LEVEL " + str(level), True, WHITE)
+    text3 = font.render("NEXT", True, WHITE)
     if game_over:
-        text = font.render("SCORE " + str(tetris_lines), True, WHITE)
-        text2 = font.render("LEVEL " + str(level), True, WHITE)
-        text_game_over = font2.render("GAME OVER!!! SPACE TO RESTART..", True, RED)
-        tetris_surface.blit(text_game_over, [80, WindowHeight - 400])
+        text = font.render("SCORE " + str(tetris_lines), True, RED)
+        text2 = font.render("LEVEL " + str(level), True, RED)
+        text_game_over = font2.render("GAME OVER!!! R TO RESTART..", True, RED)
+        tetris_surface.blit(text_game_over, [WindowWidth / 2 - 150, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
     tetris_surface.blit(text, [20, WindowHeight - 60])
     tetris_surface.blit(text2, [WindowWidth - 190, WindowHeight - 60])
+    tetris_surface.blit(text3, [WindowWidth - 190, WindowHeight / 2 - 80])
+    draw_piece(tetris_surface, next_up, WindowWidth - 200, WindowHeight / 2, False, 1)
     # Update the screen
     pygame.display.flip()
 
@@ -340,9 +348,15 @@ def shift_down(remove_row):
 
 
 def freeze_piece(current_piece, x, y, rotater):
+    global game_over, fall
     # Convert the x / y to row col
     col = int(((x - start_x) // scale) + 5)
     row = int(((y - start_y) // scale))
+
+    # Handle game over
+    if row < 1:
+        game_over = True
+        fall = False
     # Freeze the piece in the master grid array recording it's colour
     if rotater == 1:
         for i in (range(4)):
@@ -378,8 +392,8 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
             if rotater == 1:
                 if piece[current_piece][i][j] == "X":
                     # print("In check " + str(i), str(j))
-                    current_col = int(((x) // scale) - 8) + j
-                    current_row = int(((y) // scale)) + i
+                    current_col = int((x // scale) - 8) + j
+                    current_row = int((y // scale)) + i
                     # Handle the first piece
                     if current_row > 19:
                         if not dir:
@@ -496,17 +510,17 @@ def main():
     x = start_x - scale * 2
     y = start_y - scale * 2
     current_piece = select_piece()
-    update_play_field(tetris_surface, font, font2)
+    update_play_field(tetris_surface, font, font2, 1)
     draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
-    global next_piece, fall
-    next_piece = False
-    fall = True
+    global next_piece, fall, game_over, piece_sequence, next_piece_index
+    # Local vars
     directional = False
     rotate = 1
     fall_time = 0
     fall_speed = 0.37
     level_time = 0
+    next_up = 1
 
     while loop:
         # Control FPS
@@ -520,16 +534,20 @@ def main():
                 level_time -= 0.005
 
         # Spawn next piece
-        if next_piece:
+        if next_piece and not game_over:
+            next_piece_index += 1
+            if next_piece_index > 999:
+                next_piece_index = 0
             next_piece = False
             freeze_piece(current_piece, x, y, rotate)
-            current_piece = select_piece()
+            next_up = piece_sequence[next_piece_index + 1]
+            current_piece = piece_sequence[next_piece_index]
             rotate = 1
             x = start_x
             y = start_y - scale * 2
 
         # Update the display
-        update_play_field(tetris_surface, font, font2)
+        update_play_field(tetris_surface, font, font2, next_up)
         draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
         # Make piece fall
@@ -560,24 +578,25 @@ def main():
                     y = start_y - scale * 2
                     draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT and not game_over:
                     directional = True
                     if does_piece_fit2(current_piece, x + scale, y, rotate, directional):
                         x = x + scale
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT and not game_over:
                     directional = True
                     if does_piece_fit2(current_piece, x - scale, y, rotate, directional):
                         x = x - scale
-                if event.key == pygame.K_DOWN:
+                if event.key == pygame.K_DOWN and not game_over:
                     directional = False
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         y = y + scale
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP and not game_over:
                     if x > 220 and x < 460:
                         rotate += 1
                         if rotate > 4:
                             rotate = 1
-
+                if event.key == pygame.K_r and game_over:
+                    reset_game()
 
 # Call main
 main()
