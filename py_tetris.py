@@ -309,7 +309,7 @@ def generate_sequence():
     piece_sequence = [random.randrange(0, 7) for i in range(17)]
     # Predictive pattern for debugging
     #piece_sequence = [0, 1, 2, 3, 4, 5, 6, 5, 6, 5, 4, 3, 2, 1, 0, 5]
-    print (piece_sequence)
+    #print (piece_sequence)
     return piece_sequence
 
 
@@ -570,7 +570,7 @@ def main():
             else:
                 next_up = piece_sequence[next_piece_index + 1]
                 current_piece = piece_sequence[next_piece_index]
-            print(current_piece, next_up)
+            #print(current_piece, next_up)
             rotate = 1
             x = start_x
             y = start_y - scale * 2
