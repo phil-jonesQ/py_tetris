@@ -615,7 +615,9 @@ def main():
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         y = y + scale
                 if event.key == pygame.K_UP and not game_over:
-                    if x > 220 and x < 460:
+                    #if x > 220 and x < 460:
+                    directional = True
+                    if does_piece_fit2(current_piece, x + 1, y + 1, rotate, directional):
                         rotate += 1
                         if rotate > 4:
                             rotate = 1
