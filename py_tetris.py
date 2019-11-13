@@ -597,13 +597,10 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    next_piece = False
-                    freeze_piece(current_piece, x, y, rotate)
-                    current_piece = select_piece()
-                    x = start_x
-                    y = start_y - scale * 2
-                    draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+                if event.key == pygame.K_SPACE and not game_over:
+                    directional = False
+                    if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
+                        y = y + scale
 
                 if event.key == pygame.K_RIGHT and not game_over:
                     directional = True
