@@ -8,6 +8,7 @@ Working version of the game - to do
 * Detect when die - v1.03
 * Start splash screen
 * Game over splash screen - V1.04
+* Improve random number generator algorithm - V1.05
 * Fire piece down
 * Increase speed with level
 """
@@ -34,7 +35,7 @@ MAGENTA = (255, 0, 255)
 ORANGE = (255, 165, 0)
 tetris_surface = pygame.display.set_mode((WindowWidth, WindowHeight))
 clock = pygame.time.Clock()
-MY_VERSION = "1.01"
+MY_VERSION = "1.05"
 top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
 scale = 30
@@ -291,7 +292,7 @@ def update_play_field(surface, font, font2, next_up):
     if game_over:
         text = font.render("SCORE " + str(tetris_lines), True, RED)
         text2 = font.render("LEVEL " + str(level), True, RED)
-        text_game_over = font2.render("GAME OVER!!! R TO RESTART..", True, RED)
+        text_game_over = font2.render("GAME OVER! R TO RESTART..", True, RED)
         tetris_surface.blit(text_game_over, [WindowWidth / 2 - 150, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
     tetris_surface.blit(text, [20, WindowHeight - 60])
@@ -303,13 +304,15 @@ def update_play_field(surface, font, font2, next_up):
 
 
 def generate_sequence():
-    # generates a list of 16 random numbers
-    # later versions can include a more intelligent random generator
-    # eg no repetition allowed - or more of certain shapes, etc, etc
-    piece_sequence = [random.randrange(0, 7) for i in range(17)]
+    # generates a list of 17 random numbers
+    seq1 = random.sample(range(0, 7), 7)
+    seq2 = random.sample(range(0, 7), 7)
+    seq3 = random.sample(range(4, 7), 3)
+    #piece_sequence = [random.randrange(0, 7) for i in range(17)]
     # Predictive pattern for debugging
     #piece_sequence = [0, 1, 2, 3, 4, 5, 6, 5, 6, 5, 4, 3, 2, 1, 0, 5]
-    #print (piece_sequence)
+    print (seq1 + seq2 + seq3)
+    piece_sequence = seq1 + seq2 + seq3
     return piece_sequence
 
 
@@ -361,7 +364,7 @@ def freeze_piece(current_piece, x, y, rotater):
     row = int(((y - start_y) // scale))
 
     # Handle game over
-    if row < 1:
+    if row < -1:
         game_over = True
         fall = False
 
@@ -615,9 +618,7 @@ def main():
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         y = y + scale
                 if event.key == pygame.K_UP and not game_over:
-                    #if x > 220 and x < 460:
-                    directional = True
-                    if does_piece_fit2(current_piece, x + 1, y + 1, rotate, directional):
+                    if x > 220 and x < 460:
                         rotate += 1
                         if rotate > 4:
                             rotate = 1
