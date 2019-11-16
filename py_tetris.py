@@ -11,6 +11,7 @@ Working version of the game - to do
 * Improve random number generator algorithm - V1.05
 * Fire piece down
 * Increase speed with level
+* Fix rotational collision detection and add sounds - V1.06
 """
 
 import pygame
@@ -35,7 +36,7 @@ MAGENTA = (255, 0, 255)
 ORANGE = (255, 165, 0)
 tetris_surface = pygame.display.set_mode((WindowWidth, WindowHeight))
 clock = pygame.time.Clock()
-MY_VERSION = "1.05"
+MY_VERSION = "1.06"
 top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
 scale = 30
