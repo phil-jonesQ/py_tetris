@@ -696,7 +696,7 @@ def main():
                     music = True
                     play_music(True)
                 # Pause Game
-                if event.key == pygame.K_p and not pause:
+                if event.key == pygame.K_p and not pause and not game_over:
                     pause = True
 
 # Call main
