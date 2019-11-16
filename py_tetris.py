@@ -21,7 +21,6 @@ import pygame
 import random
 
 # Constants
-
 WindowWidth = 800
 WindowHeight = 700
 play_width = 300
@@ -54,9 +53,9 @@ pygame.mixer.init()
 freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
 got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
 bg_music = pygame.mixer.music.load("game_assets/Tetris.mp3")
+
 # Define multi dimensional array assets
 # All rotations defined
-
 L = ['....',
      '.X..',
      '.X..',
@@ -177,7 +176,6 @@ Z3 = ['....',
       '....']
 
 # Define each asset group as a piece array
-
 piece = [L, J, O, Z, T, I, S]
 piece1 = [L1, J1, O1, Z1, T1, I1, S1]
 piece2 = [L2, J2, O2, Z2, T2, I2, S2]
@@ -324,7 +322,6 @@ def generate_sequence():
     seq1 = random.sample(range(0, 7), 7)
     seq2 = random.sample(range(0, 7), 7)
     seq3 = random.sample(range(4, 7), 3)
-    # Predictive pattern for debugging
     piece_sequence = seq1 + seq2 + seq3
     return piece_sequence
 
@@ -343,7 +340,6 @@ def check_line():
                         hit_count += 1
                 if hit_count == 10:
                     lines_to_remove += 1
-                    #print ("Calling remove row on " + str(i))
                     tetris_lines += 1
                     remove_line(i)
                     shift_down(i)
@@ -487,7 +483,6 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
                                 current_row = int((y // scale)) + i
                                 #print("Checking background piece (r, c) " + str(r), str(c) + "Against The Falling " + str(current_row), str(current_col))
                                 if r == current_row and c == current_col:
-                                    #print (r, c, current_row, current_col)
                                     if not dir:
                                         next_piece = True
                                     return False
@@ -642,6 +637,7 @@ def main():
         if pause:
             paused()
 
+        # Handle input events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
