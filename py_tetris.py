@@ -9,10 +9,10 @@ Working version of the game - to do
 * Start splash screen
 * Game over splash screen - V1.04
 * Improve random number generator algorithm - V1.05
-* Fire piece down
+* Fire piece down - V1.08
 * Increase speed with level
 * Fix rotational collision detection and add sounds - V1.06
-* Fix Tetromino colours
+* Fix Tetromino colours - V1.07
 """
 
 import pygame
@@ -39,7 +39,7 @@ MAGENTA = (255, 0, 255)
 ORANGE = (255, 165, 0)
 tetris_surface = pygame.display.set_mode((WindowWidth, WindowHeight))
 clock = pygame.time.Clock()
-MY_VERSION = "1.06"
+MY_VERSION = "1.08"
 top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
 scale = 30
@@ -615,7 +615,9 @@ def main():
                 if event.key == pygame.K_SPACE and not game_over:
                     directional = False
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
-                        y = y + scale
+                        while does_piece_fit2(current_piece, x, y + scale, rotate, directional):
+                            y = y + scale
+
 
                 if event.key == pygame.K_RIGHT and not game_over:
                     directional = True
