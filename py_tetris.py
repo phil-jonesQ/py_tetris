@@ -12,6 +12,7 @@ Working version of the game - to do
 * Fire piece down
 * Increase speed with level
 * Fix rotational collision detection and add sounds - V1.06
+* Fix Tetromino colours
 """
 
 import pygame
@@ -31,6 +32,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 LIGHT_GREEN = (101, 152, 101)
 GREY = (128, 128, 128)
+CYAN = (0,255,255)
+PURPLE = (128,0,128)
 YELLOW = (255, 255, 0)
 MAGENTA = (255, 0, 255)
 ORANGE = (255, 165, 0)
@@ -220,17 +223,17 @@ def colour_map(piece):
     if piece == 0:
         colour = BLUE
     if piece == 1:
-        colour = GREEN
-    if piece == 2:
-        colour = RED
-    if piece == 3:
-        colour = WHITE
-    if piece == 4:
-        colour = YELLOW
-    if piece == 5:
-        colour = MAGENTA
-    if piece == 6:
         colour = ORANGE
+    if piece == 2:
+        colour = YELLOW
+    if piece == 3:
+        colour = RED
+    if piece == 4:
+        colour = PURPLE
+    if piece == 5:
+        colour = CYAN
+    if piece == 6:
+        colour = GREEN
     return colour
 
 
