@@ -13,6 +13,8 @@ Working version of the game - to do
 * Increase speed with level
 * Fix rotational collision detection and add sounds - V1.06
 * Fix Tetromino colours - V1.07
+* Add Music with on / off control - V1.09
+* Add pause feature - V1.09
 """
 
 import pygame
@@ -51,7 +53,7 @@ start_y = WindowHeight / 2 - scale * 11
 pygame.mixer.init()
 freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
 got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
-
+bg_music = pygame.mixer.music.load("game_assets/Tetris.mp3")
 # Define multi dimensional array assets
 # All rotations defined
 
@@ -298,11 +300,14 @@ def update_play_field(surface, font, font2, next_up):
     text = font.render("SCORE " + str(tetris_lines), True, WHITE)
     text2 = font.render("LEVEL " + str(level), True, WHITE)
     text3 = font.render("NEXT", True, WHITE)
+    text4 = font2.render("PAUSE", True, WHITE)
     if game_over:
         text = font.render("SCORE " + str(tetris_lines), True, RED)
         text2 = font.render("LEVEL " + str(level), True, RED)
         text_game_over = font2.render("GAME OVER! R TO RESTART..", True, RED)
-        tetris_surface.blit(text_game_over, [WindowWidth / 2 - 150, WindowHeight - scale * 2])
+        tetris_surface.blit(text_game_over, [WindowWidth / 2, WindowHeight - scale])
+    if pause:
+        tetris_surface.blit(text4, [WindowWidth / 2 - 150, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
     tetris_surface.blit(text, [20, WindowHeight - 60])
     tetris_surface.blit(text2, [WindowWidth - 190, WindowHeight - 60])
@@ -525,9 +530,29 @@ def does_piece_fit2(current_piece, x, y, rotater, dir):
     return True
 
 
+def play_music(control):
+    if control:
+        pygame.mixer.music.play(loops = -1)
+    else:
+        pygame.mixer.music.stop()
+
+
+def paused():
+    global pause
+    while pause:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_p] and pause:
+                pause = False
+
+
 def main():
+
     # Declare Global Vars
-    global next_piece, fall, game_over, piece_sequence, next_piece_index
+    global next_piece, fall, game_over, piece_sequence, next_piece_index, music, pause
 
     # Call reset of main variables
     reset_game()
@@ -539,6 +564,8 @@ def main():
     fall_time = 0
     fall_speed = 0.37
     level_time = 0
+    music = True
+    pause = False
 
     # Pygame stuff
     pygame.init()
@@ -557,6 +584,8 @@ def main():
     update_play_field(tetris_surface, font, font2, next_up)
     draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
+    # Start the Music
+    play_music(True)
 
 
     while loop:
@@ -615,6 +644,10 @@ def main():
         # Check if piece fits
         does_piece_fit2(current_piece, x, y, rotate, directional)
 
+        # Check if we've been paused
+        if pause:
+            paused()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -655,12 +688,23 @@ def main():
                         rotate += 1
                         if rotate > 4:
                             rotate = 1
+                # Restart on Game over only
                 if event.key == pygame.K_r and game_over:
                     reset_game()
                     current_piece = piece_sequence[next_piece_index]
                     next_up = piece_sequence[next_piece_index + 1]
                     update_play_field(tetris_surface, font, font2, next_up)
                     draw_piece(tetris_surface, current_piece, x, y, False, 1)
+                # Control Music
+                if event.key == pygame.K_m and not game_over and music:
+                    music = False
+                    play_music(False)
+                if event.key == pygame.K_n and not game_over and not music:
+                    music = True
+                    play_music(True)
+                # Pause Game
+                if event.key == pygame.K_p and not pause:
+                    pause = True
 
 # Call main
 main()
