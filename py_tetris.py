@@ -348,8 +348,15 @@ def check_line():
 
 def remove_line(remove_row):
     col = 10
+    visualiser_count = 0
+    visualiser = 255
     ## Clear row
     for j in (range(col)):
+        while visualiser_count > 1000:
+            visualiser_count += 1
+            while visualiser > 0:
+                grid2[remove_row][j] = (visualiser, visualiser, visualiser)
+                visualiser = visualiser - 1
         grid2[remove_row][j] = (0, 0, 0)
 
 
