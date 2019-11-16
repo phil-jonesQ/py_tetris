@@ -196,6 +196,8 @@ def reset_game():
     level = 1
     next_piece = False
     fall = True
+    play_music(False)
+    play_music(True)
 
 
 def score_to_level_map(tetris_lines):
@@ -305,9 +307,9 @@ def update_play_field(surface, font, font2, next_up):
         text = font.render("SCORE " + str(tetris_lines), True, RED)
         text2 = font.render("LEVEL " + str(level), True, RED)
         text_game_over = font2.render("GAME OVER! R TO RESTART..", True, RED)
-        tetris_surface.blit(text_game_over, [WindowWidth / 2, WindowHeight - scale])
+        tetris_surface.blit(text_game_over, [WindowWidth / 2 - 150, WindowHeight - scale * 2])
     if pause:
-        tetris_surface.blit(text4, [WindowWidth / 2 - 150, WindowHeight - scale * 2])
+        tetris_surface.blit(text4, [WindowWidth / 2 - 30, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
     tetris_surface.blit(text, [20, WindowHeight - 60])
     tetris_surface.blit(text2, [WindowWidth - 190, WindowHeight - 60])
@@ -322,10 +324,7 @@ def generate_sequence():
     seq1 = random.sample(range(0, 7), 7)
     seq2 = random.sample(range(0, 7), 7)
     seq3 = random.sample(range(4, 7), 3)
-    #piece_sequence = [random.randrange(0, 7) for i in range(17)]
     # Predictive pattern for debugging
-    #piece_sequence = [0, 1, 2, 3, 4, 5, 6, 5, 6, 5, 4, 3, 2, 1, 0, 5]
-    #print (seq1 + seq2 + seq3)
     piece_sequence = seq1 + seq2 + seq3
     return piece_sequence
 
@@ -412,7 +411,6 @@ def freeze_piece(current_piece, x, y, rotater):
             for j in (range(4)):
                 if piece3[current_piece][i][j] == "X":
                     grid2[row + i][col + j] = (colour_map(current_piece))
-
 
 
 def does_piece_fit2(current_piece, x, y, rotater, dir):
@@ -584,10 +582,6 @@ def main():
     update_play_field(tetris_surface, font, font2, next_up)
     draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
-    # Start the Music
-    play_music(True)
-
-
     while loop:
         # Control FPS
         fall_time += clock.get_rawtime()
@@ -621,7 +615,7 @@ def main():
             else:
                 next_up = piece_sequence[next_piece_index + 1]
                 current_piece = piece_sequence[next_piece_index]
-            #print(current_piece, next_up)
+
             rotate = 1
             x = start_x
             y = start_y - scale * 2
@@ -657,7 +651,6 @@ def main():
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         while does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                             y = y + scale
-
 
                 if event.key == pygame.K_RIGHT and not game_over:
                     directional = True
