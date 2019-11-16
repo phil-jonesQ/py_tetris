@@ -43,6 +43,11 @@ offset = 45
 start_x = WindowWidth / 2
 start_y = WindowHeight / 2 - scale * 11
 
+#Load Sound effects
+pygame.mixer.init()
+freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
+got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
+
 # Define multi dimensional array assets
 # All rotations defined
 
@@ -311,7 +316,7 @@ def generate_sequence():
     #piece_sequence = [random.randrange(0, 7) for i in range(17)]
     # Predictive pattern for debugging
     #piece_sequence = [0, 1, 2, 3, 4, 5, 6, 5, 6, 5, 4, 3, 2, 1, 0, 5]
-    print (seq1 + seq2 + seq3)
+    #print (seq1 + seq2 + seq3)
     piece_sequence = seq1 + seq2 + seq3
     return piece_sequence
 
@@ -334,6 +339,7 @@ def check_line():
                     tetris_lines += 1
                     remove_line(i)
                     shift_down(i)
+                    pygame.mixer.Sound.play(got_line_sound)
 
 
 def remove_line(remove_row):
@@ -358,6 +364,7 @@ def shift_down(remove_row):
 
 
 def freeze_piece(current_piece, x, y, rotater):
+    pygame.mixer.Sound.play(freeze_piece_sound)
     global game_over, fall
     # Convert the x / y to row col
     col = int(((x - start_x) // scale) + 5)
@@ -389,6 +396,7 @@ def freeze_piece(current_piece, x, y, rotater):
             for j in (range(4)):
                 if piece3[current_piece][i][j] == "X":
                     grid2[row + i][col + j] = (colour_map(current_piece))
+
 
 
 def does_piece_fit2(current_piece, x, y, rotater, dir):
@@ -618,7 +626,19 @@ def main():
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         y = y + scale
                 if event.key == pygame.K_UP and not game_over:
-                    if x > 220 and x < 460:
+                    # Check the rotation will be valid
+                    if does_piece_fit2(current_piece, x, y, 1, False) and\
+                        does_piece_fit2(current_piece, x, y, 1, True) and\
+                        does_piece_fit2(current_piece, x, y, 1, True) and\
+                        does_piece_fit2(current_piece, x, y, 2, False) and\
+                        does_piece_fit2(current_piece, x, y, 2, True) and\
+                        does_piece_fit2(current_piece, x, y, 2, True) and\
+                        does_piece_fit2(current_piece, x, y, 3, False) and\
+                        does_piece_fit2(current_piece, x, y, 3, True) and\
+                        does_piece_fit2(current_piece, x, y, 3, True) and\
+                        does_piece_fit2(current_piece, x, y, 4, False) and\
+                        does_piece_fit2(current_piece, x, y, 4, True) and\
+                        does_piece_fit2(current_piece, x, y, 4, True):
                         rotate += 1
                         if rotate > 4:
                             rotate = 1
