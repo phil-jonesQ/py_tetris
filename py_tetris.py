@@ -19,6 +19,8 @@ Working version of the game - to do
 
 import pygame
 import random
+import json
+from operator import itemgetter
 
 # Constants
 WindowWidth = 800
@@ -53,6 +55,23 @@ pygame.mixer.init()
 freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
 got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
 bg_music = pygame.mixer.music.load("game_assets/Tetris.mp3")
+
+
+#Load Up High Score Data
+
+
+def load():
+    try:
+        with open('high_score.json', 'r') as file:
+            highscores = json.load(file)  # Read the json file.
+    except FileNotFoundError:
+        return []  # Return an empty list if the file doesn't exist.
+    # Sorted by the score.
+    return sorted(highscores, key=itemgetter(1), reverse=True)
+
+
+highscores = load()
+
 
 # Define multi dimensional array assets
 # All rotations defined
@@ -276,6 +295,23 @@ def draw_piece(surface, select, x, y, start, rotater):
     # Update the screen
     pygame.display.flip()
 
+def high_score(surface, font, font2):
+    header = font2.render("HIGH SCORES", True, RED)
+    surface.blit(header, [10, 20])
+    offset_high = 35
+    for y, (hi_name, hi_score) in enumerate(highscores):
+        if y == 0:
+            colour = GREEN
+        else:
+            colour = WHITE
+        display_name = str(hi_name)
+        display_score = str(hi_score)
+        col1 = font2.render(display_name, True, colour)
+        col2 = font2.render(display_score, True, colour)
+        surface.blit(col1, [offset_high, 55 + y * scale])
+        surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
+
+
 
 def update_play_field(surface, font, font2, next_up):
     # Update screen
@@ -308,6 +344,7 @@ def update_play_field(surface, font, font2, next_up):
         text_game_over2 = font2.render("R TO RESTART...", True, WHITE)
         tetris_surface.blit(text_game_over1, [WindowWidth / 2 - 90, WindowHeight - scale * 2])
         tetris_surface.blit(text_game_over2, [WindowWidth / 2 - 90, WindowHeight - scale])
+        high_score(surface, font, font2)
     if pause:
         tetris_surface.blit(text4, [WindowWidth / 2 - 30, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
