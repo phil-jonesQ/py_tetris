@@ -304,8 +304,10 @@ def update_play_field(surface, font, font2, next_up):
     if game_over:
         text = font.render("SCORE " + str(tetris_lines), True, RED)
         text2 = font.render("LEVEL " + str(level), True, RED)
-        text_game_over = font2.render("GAME OVER! R TO RESTART..", True, RED)
-        tetris_surface.blit(text_game_over, [WindowWidth / 2 - 150, WindowHeight - scale * 2])
+        text_game_over1 = font2.render("GAME OVER!!", True, RED)
+        text_game_over2 = font2.render("R TO RESTART...", True, WHITE)
+        tetris_surface.blit(text_game_over1, [WindowWidth / 2 - 90, WindowHeight - scale * 2])
+        tetris_surface.blit(text_game_over2, [WindowWidth / 2 - 90, WindowHeight - scale])
     if pause:
         tetris_surface.blit(text4, [WindowWidth / 2 - 30, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
@@ -330,6 +332,7 @@ def check_line():
     global tetris_lines
     row = 20
     col = 10
+    factor = 1
     lines_to_remove = 0
     for i in (range(row, 1, -1)):
         for j in (range(col)):
@@ -340,7 +343,8 @@ def check_line():
                         hit_count += 1
                 if hit_count == 10:
                     lines_to_remove += 1
-                    tetris_lines += 1
+                    factor += 1
+                    tetris_lines += 1 * factor
                     remove_line(i)
                     shift_down(i)
                     pygame.mixer.Sound.play(got_line_sound)
