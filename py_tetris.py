@@ -59,7 +59,6 @@ bg_music = pygame.mixer.music.load("game_assets/Tetris.mp3")
 
 #Load Up High Score Data
 
-
 def load():
     try:
         with open('high_score.json', 'r') as file:
@@ -72,6 +71,11 @@ def load():
 
 highscores = load()
 
+# Function to save high score data
+
+def save(highscores):
+    with open('high_score.json', 'w') as file:
+        json.dump(highscores, file)  # Write the list to the json file.
 
 # Define multi dimensional array assets
 # All rotations defined
@@ -295,6 +299,7 @@ def draw_piece(surface, select, x, y, start, rotater):
     # Update the screen
     pygame.display.flip()
 
+
 def high_score(surface, font, font2):
     header = font2.render("HIGH SCORES", True, RED)
     surface.blit(header, [10, 20])
@@ -304,12 +309,52 @@ def high_score(surface, font, font2):
             colour = GREEN
         else:
             colour = WHITE
+        if y > 15:
+            break
         display_name = str(hi_name)
         display_score = str(hi_score)
         col1 = font2.render(display_name, True, colour)
         col2 = font2.render(display_score, True, colour)
         surface.blit(col1, [offset_high, 55 + y * scale])
         surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
+        if hi_name == "ZZZ":
+            color_inactive = pygame.Color('lightskyblue3')
+            color_active = pygame.Color('dodgerblue2')
+            color = color_inactive
+            active = False
+            text = ''
+            done = False
+            input_box = pygame.Rect(offset_high, 55 + y * scale, 140, 32)
+            txt_surface = font2.render(display_name, True, BLUE)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # If the user clicked on the input_box rect.
+                    if input_box.collidepoint(event.pos):
+                        print("Click")
+                        # Toggle the active variable.
+                        active = not active
+                    else:
+                        active = False
+                    color = color_active if active else color_inactive
+                    print(active)
+                    print(color)
+                if event.type == pygame.KEYDOWN:
+                    if active:
+                        if event.key == pygame.K_RETURN:
+                            print(text)
+                            text = ''
+                        elif event.key == pygame.K_BACKSPACE:
+                            text = text[:-1]
+                        else:
+                            text += event.unicode
+
+            width = max(20, txt_surface.get_width() + 10)
+            input_box.w = width
+            surface.blit(txt_surface, (offset_high, 55 + y * scale))
+            # Blit the input_box rect.
+            pygame.draw.rect(surface, color, input_box, 2)
 
 
 
@@ -417,7 +462,7 @@ def shift_down(remove_row):
 
 def freeze_piece(current_piece, x, y, rotater):
     pygame.mixer.Sound.play(freeze_piece_sound)
-    global game_over, fall
+    global game_over, fall, tetris_lines
     # Convert the x / y to row col
     col = int(((x - start_x) // scale) + 5)
     row = int(((y - start_y) // scale))
@@ -426,6 +471,9 @@ def freeze_piece(current_piece, x, y, rotater):
     if row < -1:
         game_over = True
         fall = False
+        ## Save score into highscore table as place holder ready to be edited
+        highscores.append(["ZZZ", tetris_lines])
+        save(sorted(highscores, key=itemgetter(1), reverse=True))
 
     # Freeze the piece in the master grid array recording it's colour
     if rotater == 1:
