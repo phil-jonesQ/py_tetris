@@ -62,6 +62,7 @@ abc0 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O
 abc1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 abc2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
+
 #Load Up High Score Data
 
 def load():
@@ -211,8 +212,8 @@ piece3 = [L3, J3, O3, Z3, T3, I3, S3]
 
 
 def reset_game():
-    global frame_rate, game_over, tetris_lines, level, next_piece, fall, grid2, piece_sequence, next_piece_index
-    #piece_sequence = [random.randrange(0, 7) for i in range(7)]
+    global frame_rate, game_over, tetris_lines, level, next_piece, fall, grid2, piece_sequence, next_piece_index,\
+        letter_index0, letter_index1, letter_index2, col_index
     piece_sequence = generate_sequence()
     next_piece_index = 0
     grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
@@ -224,6 +225,10 @@ def reset_game():
     fall = True
     play_music(False)
     play_music(True)
+    letter_index0 = 0
+    letter_index1 = 0
+    letter_index2 = 0
+    col_index = 0
 
 
 def score_to_level_map(tetris_lines):
@@ -306,7 +311,7 @@ def draw_piece(surface, select, x, y, start, rotater):
 
 
 def high_score(surface, font, font2):
-    global letter_index, col_index
+    global letter_index0, letter_index1, letter_index2, col_index
     header = font2.render("HIGH SCORES", True, RED)
     surface.blit(header, [10, 20])
     offset_high = 35
@@ -323,7 +328,6 @@ def high_score(surface, font, font2):
         col1 = font2.render(display_name, True, colour)
         col2 = font2.render(display_score, True, colour)
         if hi_name == "ZZZ":
-            hi_name = temp
             active = True
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -332,41 +336,62 @@ def high_score(surface, font, font2):
                     print ("In key down")
                     if active:
                         if event.key == pygame.K_q:
-                            letter_index += 1
+                            if col_index == 0:
+                                letter_index0 += 1
+                            if col_index == 1:
+                                letter_index1 += 1
+                            if col_index == 2:
+                                letter_index2 += 1
                         if event.key == pygame.K_a:
-                            letter_index -= 1
+                            if col_index == 0:
+                                letter_index0 -= 1
+                            if col_index == 1:
+                                letter_index1 -= 1
+                            if col_index == 2:
+                                letter_index2 -= 1
                         if event.key == pygame.K_x:
                             col_index += 1
                         if event.key == pygame.K_z:
                             col_index -= 1
-            if col_index > 2 or letter_index > 25:
+            if col_index > 2:
                 col_index = 0
-                letter_index = 0
-            if letter_index < 0 or col_index < 0:
-                letter_index = 25
-                col_index = 0
+            if col_index < 0:
+                col_index = 2
+            if letter_index0 > 25:
+                letter_index0 = 0
+            if letter_index1 > 25:
+                letter_index1 = 0
+            if letter_index2 > 25:
+                letter_index2 = 0
+            if letter_index0 < 0:
+                letter_index0 = 25
+            if letter_index1 < 0:
+                letter_index1 = 25
+            if letter_index2 < 0:
+                letter_index2 = 25
+
             if col_index == 0:
                 colour = RED
-                #hi_name[0] = abc0[letter_index]
+                col_1 = font2.render(abc0[letter_index0], True, colour)
             else:
                 colour = BLUE
+                col_1 = font2.render(abc0[letter_index0], True, colour)
             if col_index == 1:
                 colour = RED
-                #hi_name[1] = abc1[letter_index]
+                col_2 = font2.render(abc1[letter_index1], True, colour)
             else:
                 colour = BLUE
+                col_2 = font2.render(abc1[letter_index1], True, colour)
             if col_index == 2:
                 colour = RED
-                #hi_name[2] = abc2[letter_index]
+                col_3 = font2.render(abc2[letter_index2], True, colour)
             else:
                 colour = BLUE
-            #print(col_index, letter_index)
-            col_1 = font2.render(abc0[letter_index], True, colour)
-            col_2 = font2.render(abc1[letter_index], True, colour)
-            col_3 = font2.render(abc2[letter_index], True, colour)
+                col_3 = font2.render(abc2[letter_index2], True, colour)
+
             surface.blit(col_1, [offset_high, 55 + y * scale])
-            surface.blit(col_2, [offset_high + 10, 55 + y * scale])
-            surface.blit(col_3, [offset_high + 20, 55 + y * scale])
+            surface.blit(col_2, [offset_high + 15, 55 + y * scale])
+            surface.blit(col_3, [offset_high + 30 , 55 + y * scale])
             surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
         else:
             surface.blit(col1, [offset_high, 55 + y * scale])
@@ -665,8 +690,7 @@ def main():
     level_time = 0
     music = True
     pause = False
-    letter_index = 0
-    col_index = 0
+
 
     # Pygame stuff
     pygame.init()
