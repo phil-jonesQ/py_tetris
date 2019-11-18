@@ -56,6 +56,11 @@ freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
 got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
 bg_music = pygame.mixer.music.load("game_assets/Tetris.mp3")
 
+# High Score Letters
+
+abc0 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+abc1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+abc2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
 #Load Up High Score Data
 
@@ -301,9 +306,11 @@ def draw_piece(surface, select, x, y, start, rotater):
 
 
 def high_score(surface, font, font2):
+    global letter_index, col_index
     header = font2.render("HIGH SCORES", True, RED)
     surface.blit(header, [10, 20])
     offset_high = 35
+    temp = "AAA"
     for y, (hi_name, hi_score) in enumerate(highscores):
         if y == 0:
             colour = GREEN
@@ -315,46 +322,56 @@ def high_score(surface, font, font2):
         display_score = str(hi_score)
         col1 = font2.render(display_name, True, colour)
         col2 = font2.render(display_score, True, colour)
-        surface.blit(col1, [offset_high, 55 + y * scale])
-        surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
         if hi_name == "ZZZ":
-            color_inactive = pygame.Color('lightskyblue3')
-            color_active = pygame.Color('dodgerblue2')
-            color = color_inactive
-            active = False
-            text = ''
-            done = False
-            input_box = pygame.Rect(offset_high, 55 + y * scale, 140, 32)
-            txt_surface = font2.render(display_name, True, BLUE)
+            hi_name = temp
+            active = True
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    done = True
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    # If the user clicked on the input_box rect.
-                    if input_box.collidepoint(event.pos):
-                        print("Click")
-                        # Toggle the active variable.
-                        active = not active
-                    else:
-                        active = False
-                    color = color_active if active else color_inactive
-                    print(active)
-                    print(color)
+                    pygame.quit()
                 if event.type == pygame.KEYDOWN:
+                    print ("In key down")
                     if active:
-                        if event.key == pygame.K_RETURN:
-                            print(text)
-                            text = ''
-                        elif event.key == pygame.K_BACKSPACE:
-                            text = text[:-1]
-                        else:
-                            text += event.unicode
+                        if event.key == pygame.K_q:
+                            letter_index += 1
+                        if event.key == pygame.K_a:
+                            letter_index -= 1
+                        if event.key == pygame.K_x:
+                            col_index += 1
+                        if event.key == pygame.K_z:
+                            col_index -= 1
+            if col_index > 2 or letter_index > 25:
+                col_index = 0
+                letter_index = 0
+            if letter_index < 0 or col_index < 0:
+                letter_index = 25
+                col_index = 0
+            if col_index == 0:
+                colour = RED
+                #hi_name[0] = abc0[letter_index]
+            else:
+                colour = BLUE
+            if col_index == 1:
+                colour = RED
+                #hi_name[1] = abc1[letter_index]
+            else:
+                colour = BLUE
+            if col_index == 2:
+                colour = RED
+                #hi_name[2] = abc2[letter_index]
+            else:
+                colour = BLUE
+            #print(col_index, letter_index)
+            col_1 = font2.render(abc0[letter_index], True, colour)
+            col_2 = font2.render(abc1[letter_index], True, colour)
+            col_3 = font2.render(abc2[letter_index], True, colour)
+            surface.blit(col_1, [offset_high, 55 + y * scale])
+            surface.blit(col_2, [offset_high + 10, 55 + y * scale])
+            surface.blit(col_3, [offset_high + 20, 55 + y * scale])
+            surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
+        else:
+            surface.blit(col1, [offset_high, 55 + y * scale])
+            surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
 
-            width = max(20, txt_surface.get_width() + 10)
-            input_box.w = width
-            surface.blit(txt_surface, (offset_high, 55 + y * scale))
-            # Blit the input_box rect.
-            pygame.draw.rect(surface, color, input_box, 2)
 
 
 
@@ -634,7 +651,7 @@ def paused():
 def main():
 
     # Declare Global Vars
-    global next_piece, fall, game_over, piece_sequence, next_piece_index, music, pause
+    global next_piece, fall, game_over, piece_sequence, next_piece_index, music, pause, letter_index, col_index
 
     # Call reset of main variables
     reset_game()
@@ -648,6 +665,8 @@ def main():
     level_time = 0
     music = True
     pause = False
+    letter_index = 0
+    col_index = 0
 
     # Pygame stuff
     pygame.init()
