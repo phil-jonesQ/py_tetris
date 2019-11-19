@@ -213,7 +213,7 @@ piece3 = [L3, J3, O3, Z3, T3, I3, S3]
 
 def reset_game():
     global frame_rate, game_over, tetris_lines, level, next_piece, fall, grid2, piece_sequence, next_piece_index,\
-        letter_index0, letter_index1, letter_index2, col_index
+        letter_index0, letter_index1, letter_index2, col_index, done, active
     piece_sequence = generate_sequence()
     next_piece_index = 0
     grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
@@ -229,6 +229,8 @@ def reset_game():
     letter_index1 = 0
     letter_index2 = 0
     col_index = 0
+    done = False
+    active = True
 
 
 def score_to_level_map(tetris_lines):
@@ -311,11 +313,11 @@ def draw_piece(surface, select, x, y, start, rotater):
 
 
 def high_score(surface, font, font2):
-    global letter_index0, letter_index1, letter_index2, col_index
+    global letter_index0, letter_index1, letter_index2, col_index, active, done
     header = font2.render("HIGH SCORES", True, RED)
     surface.blit(header, [10, 20])
     offset_high = 35
-    temp = "AAA"
+
     for y, (hi_name, hi_score) in enumerate(highscores):
         if y == 0:
             colour = GREEN
@@ -327,13 +329,12 @@ def high_score(surface, font, font2):
         display_score = str(hi_score)
         col1 = font2.render(display_name, True, colour)
         col2 = font2.render(display_score, True, colour)
-        if hi_name == "ZZZ":
-            active = True
+        if hi_name == "ZZZ_PLACE_HOLDER":
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                 if event.type == pygame.KEYDOWN:
-                    print ("In key down")
                     if active:
                         if event.key == pygame.K_q:
                             if col_index == 0:
@@ -353,6 +354,8 @@ def high_score(surface, font, font2):
                             col_index += 1
                         if event.key == pygame.K_z:
                             col_index -= 1
+                        if event.key == pygame.K_s:
+                            done = True
             if col_index > 2:
                 col_index = 0
             if col_index < 0:
@@ -370,24 +373,41 @@ def high_score(surface, font, font2):
             if letter_index2 < 0:
                 letter_index2 = 25
 
-            if col_index == 0:
-                colour = RED
+            if done:
+                active = False
+                colour = WHITE
+                hi_name = abc0[letter_index0] + abc1[letter_index1] + abc2[letter_index2]
                 col_1 = font2.render(abc0[letter_index0], True, colour)
-            else:
-                colour = BLUE
-                col_1 = font2.render(abc0[letter_index0], True, colour)
-            if col_index == 1:
-                colour = RED
                 col_2 = font2.render(abc1[letter_index1], True, colour)
-            else:
-                colour = BLUE
-                col_2 = font2.render(abc1[letter_index1], True, colour)
-            if col_index == 2:
-                colour = RED
                 col_3 = font2.render(abc2[letter_index2], True, colour)
+                print(highscores)
+                print(hi_name, hi_score)
+                highscores.append([hi_name, hi_score])
+                for y, (hi_name, hi_score) in enumerate(highscores):
+                    if hi_name == "ZZZ_PLACE_HOLDER":
+                        print (y)
+                        del highscores[y]
+                save(sorted(highscores, key=itemgetter(1), reverse=True))
+                done = False
             else:
-                colour = BLUE
-                col_3 = font2.render(abc2[letter_index2], True, colour)
+                if col_index == 0:
+                    colour = RED
+                    col_1 = font2.render(abc0[letter_index0], True, colour)
+                else:
+                    colour = BLUE
+                    col_1 = font2.render(abc0[letter_index0], True, colour)
+                if col_index == 1:
+                    colour = RED
+                    col_2 = font2.render(abc1[letter_index1], True, colour)
+                else:
+                    colour = BLUE
+                    col_2 = font2.render(abc1[letter_index1], True, colour)
+                if col_index == 2:
+                    colour = RED
+                    col_3 = font2.render(abc2[letter_index2], True, colour)
+                else:
+                    colour = BLUE
+                    col_3 = font2.render(abc2[letter_index2], True, colour)
 
             surface.blit(col_1, [offset_high, 55 + y * scale])
             surface.blit(col_2, [offset_high + 15, 55 + y * scale])
@@ -514,7 +534,7 @@ def freeze_piece(current_piece, x, y, rotater):
         game_over = True
         fall = False
         ## Save score into highscore table as place holder ready to be edited
-        highscores.append(["ZZZ", tetris_lines])
+        highscores.append(["ZZZ_PLACE_HOLDER", tetris_lines])
         save(sorted(highscores, key=itemgetter(1), reverse=True))
 
     # Freeze the piece in the master grid array recording it's colour
