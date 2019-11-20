@@ -831,7 +831,7 @@ def main():
                         rotate += 1
                         if rotate > 4:
                             rotate = 1
-                # Restart on Game over only
+                # Restart on Game over condition only
                 if event.key == pygame.K_r and game_over:
                     reset_game()
                     current_piece = piece_sequence[next_piece_index]
