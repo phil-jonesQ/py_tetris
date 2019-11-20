@@ -57,8 +57,7 @@ freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
 got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
 bg_music = pygame.mixer.music.load("game_assets/Tetris.mp3")
 
-# High Score Letters
-
+# High Score Letter Lists
 abc0 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 abc1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 abc2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -209,12 +208,14 @@ piece1 = [L1, J1, O1, Z1, T1, I1, S1]
 piece2 = [L2, J2, O2, Z2, T2, I2, S2]
 piece3 = [L3, J3, O3, Z3, T3, I3, S3]
 
-
+# Function to reset all of the games variables
 def reset_game():
     global frame_rate, game_over, tetris_lines, level, next_piece, fall, grid2, piece_sequence, next_piece_index,\
         letter_index0, letter_index1, letter_index2, col_index, done, active, highscores
+    # Generate the initial random sequence of 17
     piece_sequence = generate_sequence()
     next_piece_index = 0
+    # The main game play area grid - pieces are frozen into this when they have settled
     grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
     tetris_lines = 0
     game_over = False
@@ -232,7 +233,7 @@ def reset_game():
     active = True
     highscores = load()
 
-
+# Simple switch to map the level to how many lines you've got
 def score_to_level_map(tetris_lines):
     global level
     if tetris_lines > 3:
@@ -255,7 +256,7 @@ def score_to_level_map(tetris_lines):
         level = 9
     return level
 
-
+# Map the pieces to colours
 def colour_map(piece):
     if piece == 0:
         colour = BLUE
@@ -273,7 +274,7 @@ def colour_map(piece):
         colour = GREEN
     return colour
 
-
+# Draw our multi dimensional shape to the screen (all 4 rotations)
 def draw_piece(surface, select, x, y, start, rotater):
     colour = colour_map(select)
 
@@ -311,7 +312,7 @@ def draw_piece(surface, select, x, y, start, rotater):
     # Update the screen
     pygame.display.flip()
 
-
+# Function to take care of displaying and updating the high score table
 def high_score(surface, font, font2):
     global letter_index0, letter_index1, letter_index2, col_index, active, done
     clock.tick(150)
@@ -331,6 +332,8 @@ def high_score(surface, font, font2):
         display_score = str(hi_score)
         col1 = font2.render(display_name, True, colour)
         col2 = font2.render(display_score, True, colour)
+        # Look for the place holder in the high score list, when found edit at this point
+        # Note, if you're less than 15th place then you won't make it on there
         if hi_name == "ZZZ_PLACE_HOLDER":
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -357,6 +360,7 @@ def high_score(surface, font, font2):
                             col_index -= 1
                         if event.key == pygame.K_SPACE:
                             done = True
+            # Wrap around the selections
             if col_index > 2:
                 col_index = 0
             if col_index < 0:
@@ -373,7 +377,7 @@ def high_score(surface, font, font2):
                 letter_index1 = 25
             if letter_index2 < 0:
                 letter_index2 = 25
-
+            # if save has been triggered save the data and make it white
             if done:
                 active = False
                 colour = WHITE
@@ -417,7 +421,7 @@ def high_score(surface, font, font2):
             surface.blit(col1, [offset_high, 55 + y * scale])
             surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
 
-
+# Update the Game's play field
 def update_play_field(surface, font, font2, next_up):
     # Update screen
     tetris_surface.fill(BLACK)
@@ -469,7 +473,7 @@ def generate_sequence():
     piece_sequence = seq1 + seq2 + seq3
     return piece_sequence
 
-
+# Check if lines have been completed
 def check_line():
     global tetris_lines
     row = 20
@@ -491,13 +495,14 @@ def check_line():
                     shift_down(i)
                     pygame.mixer.Sound.play(got_line_sound)
 
-
+# Remove out a row
 def remove_line(remove_row):
     col = 10
     visualiser_count = 0
     visualiser = 255
     ## Clear row
     for j in (range(col)):
+        # This was supposed to make the line fade out - but doesn't work ## TO DO
         while visualiser_count > 1000:
             visualiser_count += 1
             while visualiser > 0:
@@ -505,7 +510,7 @@ def remove_line(remove_row):
                 visualiser = visualiser - 1
         grid2[remove_row][j] = (0, 0, 0)
 
-
+# Shift all pieces down above from the row that has been cleared
 def shift_down(remove_row):
     start_row = remove_row
     row = 20
@@ -519,7 +524,7 @@ def shift_down(remove_row):
                 grid2[i + 1][j] = grid2[i][j]
                 grid2[i][j] = (0, 0, 0)
 
-
+# Freeze the settled piece into the background preserving it's coordinates and colour
 def freeze_piece(current_piece, x, y, rotater):
     pygame.mixer.Sound.play(freeze_piece_sound)
     global game_over, fall, tetris_lines
@@ -556,7 +561,7 @@ def freeze_piece(current_piece, x, y, rotater):
                 if piece3[current_piece][i][j] == "X":
                     grid2[row + i][col + j] = (colour_map(current_piece))
 
-
+# Collision detection function
 def does_piece_fit2(current_piece, x, y, rotater, dir):
     # Convert the x / y to row col
     global next_piece
@@ -822,7 +827,7 @@ def main():
                         does_piece_fit2(current_piece, x, y, 3, True) and\
                         does_piece_fit2(current_piece, x, y, 4, False) and\
                         does_piece_fit2(current_piece, x, y, 4, True) and\
-                        does_piece_fit2(current_piece, x, y, 4, True):
+                            does_piece_fit2(current_piece, x, y, 4, True):
                         rotate += 1
                         if rotate > 4:
                             rotate = 1
