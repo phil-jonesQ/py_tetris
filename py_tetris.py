@@ -262,23 +262,23 @@ def map_speed_to_level(level_on):
 # Simple switch to map the level to how many lines you've got
 def score_to_level_map(tetris_lines):
     global level
-    if tetris_lines > 3:
+    if tetris_lines > 10:
         level = 2
-    if tetris_lines > 6:
+    if tetris_lines > 20:
         level = 3
-    if tetris_lines > 9:
-        level = 4
-    if tetris_lines > 12:
-        level = 5
-    if tetris_lines > 15:
-        level = 6
-    if tetris_lines > 18:
-        level = 7
-    if tetris_lines > 21:
-        level = 8
-    if tetris_lines > 25:
-        level = 9
     if tetris_lines > 30:
+        level = 4
+    if tetris_lines > 40:
+        level = 5
+    if tetris_lines > 50:
+        level = 6
+    if tetris_lines > 60:
+        level = 7
+    if tetris_lines > 70:
+        level = 8
+    if tetris_lines > 80:
+        level = 9
+    if tetris_lines > 90:
         level = 10
     return level
 
@@ -488,7 +488,7 @@ def update_play_field(surface, font, font2, next_up):
         tetris_surface.blit(text4, [WindowWidth / 2 - 30, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
     tetris_surface.blit(text, [20, WindowHeight - 60])
-    tetris_surface.blit(text2, [WindowWidth - 190, WindowHeight - 60])
+    tetris_surface.blit(text2, [WindowWidth - 210, WindowHeight - 60])
     tetris_surface.blit(text3, [WindowWidth - 190, WindowHeight / 2 - 80])
     draw_piece(tetris_surface, next_up, WindowWidth - 200, WindowHeight / 2, False, 1)
     # Update the screen
