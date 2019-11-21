@@ -10,7 +10,7 @@ Working version of the game - to do
 * Game over splash screen - V1.04
 * Improve random number generator algorithm - V1.05
 * Fire piece down - V1.08
-* Increase speed with level
+* Increase speed with level - V.1.11
 * Fix rotational collision detection and add sounds - V1.06
 * Fix Tetromino colours - V1.07
 * Add Music with on / off control - V1.09
@@ -43,7 +43,7 @@ MAGENTA = (255, 0, 255)
 ORANGE = (255, 165, 0)
 tetris_surface = pygame.display.set_mode((WindowWidth, WindowHeight))
 clock = pygame.time.Clock()
-MY_VERSION = "1.10"
+MY_VERSION = "1.11"
 top_left_x = (WindowWidth - play_width) // 2
 top_left_y = WindowHeight - play_height - 80
 scale = 30
@@ -51,7 +51,7 @@ offset = 45
 start_x = WindowWidth / 2
 start_y = WindowHeight / 2 - scale * 11
 
-#Load Sound effects
+# Load Sound effects
 pygame.mixer.init()
 freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
 got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
@@ -63,8 +63,7 @@ abc1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O
 abc2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
 
-#Load Up High Score Data
-
+# Load Up High Score Data
 def load():
     try:
         with open('high_score.json', 'r') as file:
@@ -208,10 +207,11 @@ piece1 = [L1, J1, O1, Z1, T1, I1, S1]
 piece2 = [L2, J2, O2, Z2, T2, I2, S2]
 piece3 = [L3, J3, O3, Z3, T3, I3, S3]
 
+
 # Function to reset all of the games variables
 def reset_game():
     global frame_rate, game_over, tetris_lines, level, next_piece, fall, grid2, piece_sequence, next_piece_index,\
-        letter_index0, letter_index1, letter_index2, col_index, done, active, highscores
+        letter_index0, letter_index1, letter_index2, col_index, done, active, highscores, fall_speed
     # Generate the initial random sequence of 17
     piece_sequence = generate_sequence()
     next_piece_index = 0
@@ -223,6 +223,7 @@ def reset_game():
     level = 1
     next_piece = False
     fall = True
+    fall_speed = 0.37
     play_music(False)
     play_music(True)
     letter_index0 = 0
@@ -232,6 +233,29 @@ def reset_game():
     done = False
     active = True
     highscores = load()
+
+
+# Simple switch to map the level to fall rate
+def map_speed_to_level(level_on):
+    level_fall_rate = 1200
+    if level_on > 2:
+        level_fall_rate = 1100
+    if level_on > 3:
+        level_fall_rate = 1000
+    if level_on > 4:
+        level_fall_rate = 900
+    if level_on > 5:
+        level_fall_rate = 800
+    if level_on > 6:
+        level_fall_rate = 700
+    if level_on > 7:
+        level_fall_rate = 600
+    if level_on > 8:
+        level_fall_rate = 500
+    if level_on > 9:
+        level_fall_rate = 400
+    return level_fall_rate
+
 
 # Simple switch to map the level to how many lines you've got
 def score_to_level_map(tetris_lines):
@@ -256,6 +280,7 @@ def score_to_level_map(tetris_lines):
         level = 9
     return level
 
+
 # Map the pieces to colours
 def colour_map(piece):
     if piece == 0:
@@ -273,6 +298,7 @@ def colour_map(piece):
     if piece == 6:
         colour = GREEN
     return colour
+
 
 # Draw our multi dimensional shape to the screen (all 4 rotations)
 def draw_piece(surface, select, x, y, start, rotater):
@@ -311,6 +337,7 @@ def draw_piece(surface, select, x, y, start, rotater):
 
     # Update the screen
     pygame.display.flip()
+
 
 # Function to take care of displaying and updating the high score table
 def high_score(surface, font, font2):
@@ -421,6 +448,7 @@ def high_score(surface, font, font2):
             surface.blit(col1, [offset_high, 55 + y * scale])
             surface.blit(col2, [offset_high + scale * 3, 55 + y * scale])
 
+
 # Update the Game's play field
 def update_play_field(surface, font, font2, next_up):
     # Update screen
@@ -473,6 +501,7 @@ def generate_sequence():
     piece_sequence = seq1 + seq2 + seq3
     return piece_sequence
 
+
 # Check if lines have been completed
 def check_line():
     global tetris_lines
@@ -495,6 +524,7 @@ def check_line():
                     shift_down(i)
                     pygame.mixer.Sound.play(got_line_sound)
 
+
 # Remove out a row
 def remove_line(remove_row):
     col = 10
@@ -510,6 +540,7 @@ def remove_line(remove_row):
                 visualiser = visualiser - 1
         grid2[remove_row][j] = (0, 0, 0)
 
+
 # Shift all pieces down above from the row that has been cleared
 def shift_down(remove_row):
     start_row = remove_row
@@ -523,6 +554,7 @@ def shift_down(remove_row):
                 # print("Moving row " + str(i) + " coloumn " + str(j) + " to row " + str(i + 1) + " column " + str(j))
                 grid2[i + 1][j] = grid2[i][j]
                 grid2[i][j] = (0, 0, 0)
+
 
 # Freeze the settled piece into the background preserving it's coordinates and colour
 def freeze_piece(current_piece, x, y, rotater):
@@ -560,6 +592,7 @@ def freeze_piece(current_piece, x, y, rotater):
             for j in (range(4)):
                 if piece3[current_piece][i][j] == "X":
                     grid2[row + i][col + j] = (colour_map(current_piece))
+
 
 # Collision detection function
 def does_piece_fit2(current_piece, x, y, rotater, dir):
@@ -708,11 +741,9 @@ def main():
     directional = False
     rotate = 1
     fall_time = 0
-    fall_speed = 0.37
     level_time = 0
     music = True
     pause = False
-
 
     # Pygame stuff
     pygame.init()
@@ -774,7 +805,7 @@ def main():
         draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
         # Make piece fall
-        if fall_time / 1000 > fall_speed:
+        if fall_time / map_speed_to_level(level) > fall_speed:
             fall_time = 0
             if fall:
                 directional = False
@@ -848,6 +879,7 @@ def main():
                 # Pause Game
                 if event.key == pygame.K_p and not pause and not game_over:
                     pause = True
+
 
 # Call main
 main()
