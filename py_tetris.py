@@ -254,6 +254,8 @@ def map_speed_to_level(level_on):
         level_fall_rate = 500
     if level_on > 9:
         level_fall_rate = 400
+    if level_on > 10:
+        level_fall_rate = 350
     return level_fall_rate
 
 
@@ -261,23 +263,23 @@ def map_speed_to_level(level_on):
 def score_to_level_map(tetris_lines):
     global level
     if tetris_lines > 3:
-        level = 1
-    if tetris_lines > 6:
         level = 2
-    if tetris_lines > 9:
+    if tetris_lines > 6:
         level = 3
-    if tetris_lines > 12:
+    if tetris_lines > 9:
         level = 4
-    if tetris_lines > 15:
+    if tetris_lines > 12:
         level = 5
-    if tetris_lines > 18:
+    if tetris_lines > 15:
         level = 6
-    if tetris_lines > 21:
+    if tetris_lines > 18:
         level = 7
-    if tetris_lines > 24:
+    if tetris_lines > 21:
         level = 8
-    if tetris_lines > 27:
+    if tetris_lines > 25:
         level = 9
+    if tetris_lines > 30:
+        level = 10
     return level
 
 
