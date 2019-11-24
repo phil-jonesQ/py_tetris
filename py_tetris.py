@@ -6,7 +6,7 @@ V1.01 November 11 2019
 Working version of the game - to do
 * Next piece preview - V1.02
 * Detect when die - v1.03
-* Start splash screen
+* Start splash screen - V1.12
 * Game over splash screen - V1.04
 * Improve random number generator algorithm - V1.05
 * Fire piece down - V1.08
@@ -262,23 +262,23 @@ def map_speed_to_level(level_on):
 # Simple switch to map the level to how many lines you've got
 def score_to_level_map(tetris_lines):
     global level
-    if tetris_lines > 10:
+    if tetris_lines > 100:
         level = 2
-    if tetris_lines > 20:
+    if tetris_lines > 200:
         level = 3
-    if tetris_lines > 30:
+    if tetris_lines > 300:
         level = 4
-    if tetris_lines > 40:
+    if tetris_lines > 400:
         level = 5
-    if tetris_lines > 50:
+    if tetris_lines > 500:
         level = 6
-    if tetris_lines > 60:
+    if tetris_lines > 600:
         level = 7
-    if tetris_lines > 70:
+    if tetris_lines > 700:
         level = 8
-    if tetris_lines > 80:
+    if tetris_lines > 800:
         level = 9
-    if tetris_lines > 90:
+    if tetris_lines > 900:
         level = 10
     return level
 
@@ -414,8 +414,6 @@ def high_score(surface, font, font2):
                 col_1 = font2.render(abc0[letter_index0], True, colour)
                 col_2 = font2.render(abc1[letter_index1], True, colour)
                 col_3 = font2.render(abc2[letter_index2], True, colour)
-                #print(highscores)
-                #print(hi_name, hi_score)
                 highscores.append([hi_name, hi_score])
                 for y, (hi_name, hi_score) in enumerate(highscores):
                     if hi_name == "ZZZ_PLACE_HOLDER":
@@ -476,21 +474,28 @@ def update_play_field(surface, font, font2, next_up):
     text2 = font.render("LEVEL " + str(level), True, WHITE)
     text3 = font.render("NEXT", True, WHITE)
     text4 = font2.render("PAUSE", True, WHITE)
-    if game_over:
+    if game_over or start:
         text = font.render("SCORE " + str(tetris_lines), True, RED)
         text2 = font.render("LEVEL " + str(level), True, RED)
-        text_game_over1 = font2.render("GAME OVER!!", True, RED)
-        text_game_over2 = font2.render("R TO RESTART...", True, WHITE)
-        tetris_surface.blit(text_game_over1, [WindowWidth / 2 - 90, WindowHeight - scale * 2])
-        tetris_surface.blit(text_game_over2, [WindowWidth / 2 - 90, WindowHeight - scale])
+        if game_over:
+            text_game_over1 = font2.render("GAME OVER!!", True, RED)
+            text_game_over2 = font2.render("R TO RESTART...", True, WHITE)
+            tetris_surface.blit(text_game_over1, [WindowWidth / 2 - 90, WindowHeight - scale * 2])
+            tetris_surface.blit(text_game_over2, [WindowWidth / 2 - 90, WindowHeight - scale])
+        if start:
+            text_start1 = font2.render("RETRO TETRO", True, GREEN)
+            text_start2 = font2.render("S TO START", True, GREEN)
+            tetris_surface.blit(text_start1, [WindowWidth / 2 - 90, WindowHeight - scale * 2])
+            tetris_surface.blit(text_start2, [WindowWidth / 2 - 70, WindowHeight - scale])
         high_score(surface, font, font2)
     if pause:
         tetris_surface.blit(text4, [WindowWidth / 2 - 30, WindowHeight - scale * 2])
     pygame.draw.line(tetris_surface, WHITE, (0, WindowHeight - 65), (WindowWidth, WindowHeight - 65))
     tetris_surface.blit(text, [20, WindowHeight - 60])
     tetris_surface.blit(text2, [WindowWidth - 210, WindowHeight - 60])
-    tetris_surface.blit(text3, [WindowWidth - 190, WindowHeight / 2 - 80])
-    draw_piece(tetris_surface, next_up, WindowWidth - 200, WindowHeight / 2, False, 1)
+    if not start:
+        tetris_surface.blit(text3, [WindowWidth - 190, WindowHeight / 2 - 80])
+        draw_piece(tetris_surface, next_up, WindowWidth - 200, WindowHeight / 2, False, 1)
     # Update the screen
     pygame.display.flip()
 
@@ -718,6 +723,18 @@ def play_music(control):
         pygame.mixer.music.stop()
 
 
+def start_game():
+    global start
+    while start:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_s] and start:
+                start = False
+
+
 def paused():
     global pause
     while pause:
@@ -733,7 +750,8 @@ def paused():
 def main():
 
     # Declare Global Vars
-    global next_piece, fall, game_over, piece_sequence, next_piece_index, music, pause, letter_index, col_index
+    global next_piece, fall, game_over, piece_sequence, next_piece_index, music, pause, letter_index, col_index, start,\
+        tetris_lines
 
     # Call reset of main variables
     reset_game()
@@ -746,6 +764,7 @@ def main():
     level_time = 0
     music = True
     pause = False
+    start = True
 
     # Pygame stuff
     pygame.init()
@@ -762,9 +781,16 @@ def main():
     next_up = piece_sequence[next_piece_index + 1]
 
     update_play_field(tetris_surface, font, font2, next_up)
+
+    # Check if the game has just been started
+
+    if start:
+        start_game()
+
     draw_piece(tetris_surface, current_piece, x, y, False, 1)
 
     while loop:
+
         # Control FPS
         fall_time += clock.get_rawtime()
         level_time += clock.get_rawtime()
@@ -830,6 +856,8 @@ def main():
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not game_over:
+                    # The player gets extra points when using the hard drop
+                    tetris_lines += 2
                     directional = False
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         while does_piece_fit2(current_piece, x, y + scale, rotate, directional):
