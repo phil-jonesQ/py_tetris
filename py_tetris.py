@@ -55,7 +55,7 @@ start_y = WindowHeight / 2 - scale * 11
 pygame.mixer.init()
 freeze_piece_sound = pygame.mixer.Sound("game_assets/freeze.wav")
 got_line_sound = pygame.mixer.Sound("game_assets/got_line.wav")
-bg_music = pygame.mixer.music.load("game_assets/Tetris.mp3")
+bg_music = pygame.mixer.music.load("game_assets/Tetris.ogg")
 
 # High Score Letter Lists
 abc0 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
