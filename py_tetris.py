@@ -219,13 +219,12 @@ def reset_game():
     grid2 = [[(0, 0, 0) for x in range(10)] for x in range(21)]
     tetris_lines = 0
     game_over = False
-    frame_rate = 5
+    frame_rate = 30
     level = 1
     next_piece = False
     fall = True
     fall_speed = 0.37
     play_music(False)
-    play_music(True)
     letter_index0 = 0
     letter_index1 = 0
     letter_index2 = 0
@@ -338,7 +337,7 @@ def draw_piece(surface, select, x, y, start, rotater):
                     pygame.draw.rect(surface, colour, (sx + i * scale, sy + j * scale, scale - 2, scale - 2))
 
     # Update the screen
-    pygame.display.flip()
+    pygame.display.update()
 
 
 # Function to take care of displaying and updating the high score table
@@ -497,7 +496,7 @@ def update_play_field(surface, font, font2, next_up):
         tetris_surface.blit(text3, [WindowWidth - 190, WindowHeight / 2 - 80])
         draw_piece(tetris_surface, next_up, WindowWidth - 200, WindowHeight / 2, False, 1)
     # Update the screen
-    pygame.display.flip()
+    pygame.display.update()
 
 
 def generate_sequence():
@@ -762,7 +761,7 @@ def main():
     rotate = 1
     fall_time = 0
     level_time = 0
-    music = True
+    music = False
     pause = False
     start = True
 
@@ -786,11 +785,13 @@ def main():
 
     if start:
         start_game()
-
-    draw_piece(tetris_surface, current_piece, x, y, False, 1)
+    
 
     while loop:
-
+        # Draw pieces to the screen providing it's not game over
+        if not game_over:
+            draw_piece(tetris_surface, current_piece, x, y, False, rotate)
+        
         # Control FPS
         fall_time += clock.get_rawtime()
         level_time += clock.get_rawtime()
@@ -800,7 +801,7 @@ def main():
             level_time = 0
             if level_time > 0.12:
                 level_time -= 0.005
-
+        
         # Spawn next piece
         if next_piece and not game_over:
             # Set the next piece flag to false
@@ -828,9 +829,6 @@ def main():
             x = start_x
             y = start_y - scale * 2
 
-        # Update the display
-        update_play_field(tetris_surface, font, font2, next_up)
-        draw_piece(tetris_surface, current_piece, x, y, False, rotate)
 
         # Make piece fall
         if fall_time / map_speed_to_level(level) > fall_speed:
@@ -839,6 +837,8 @@ def main():
                 directional = False
                 if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                     y = y + scale
+                    update_play_field(tetris_surface, font, font2, next_up)
+
 
         # Check for a line
         check_line()
@@ -850,11 +850,16 @@ def main():
         if pause:
             paused()
 
+        # Check if the Game is over and re-draw the display
+        if game_over:
+            update_play_field(tetris_surface, font, font2, next_up)
+
         # Handle input events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
+                update_play_field(tetris_surface, font, font2, next_up)
                 if event.key == pygame.K_SPACE and not game_over:
                     # The player gets extra points when using the hard drop
                     tetris_lines += 2
@@ -875,6 +880,7 @@ def main():
                     directional = False
                     if does_piece_fit2(current_piece, x, y + scale, rotate, directional):
                         y = y + scale
+                        draw_piece(tetris_surface, current_piece, x, y, False, rotate)
                 if event.key == pygame.K_UP and not game_over:
                     # Check the rotation will be valid
                     if does_piece_fit2(current_piece, x, y, 1, False) and\
