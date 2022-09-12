@@ -3,11 +3,37 @@
 # Setup
 $app_name="py_tetris"
 $requirements=".\pip_requirements.txt" # Create with pip freeze > pip_requirements.txt
-$path_to_build_util="c:\Users\admin\AppData\Local\Programs\Python\Python37\Lib\site-packages\PyInstaller" # Path to PyInstaller (creates exe from python source)
+$path_to_build_util=".\.venv\Lib\site-packages\PyInstaller" # Path to PyInstaller (creates exe from python source)
 $exta_files=@('*.json','*.md')
+$python_version=$(& python --version).split(' ').split('.')
+$python_version_major_required=[int]"3"
+$python_version_minor_required=[int]"10"
 
+# Check Python is installed, otherwise abort
+# convert major version and minor to int
+$python_version_major=[int]$python_version[1]
+$python_version_minor=[int]$python_version[2]
+if ( $python_version_major -lt $python_version_major_required ) {
+    Write-Output "Error: Python is either not detected or less than $($python_version_major_required).x"
+    exit(1)
+}
+if ( $python_version_minor -lt $python_version_minor_required ){
+    Write-Output "Error: Python is either not detected or less than $($python_version_major_required).$($python_version_minor_required)"
+    exit(1)
+}
+Write-Output "Python $($python_version) detected - proceeding..."
+
+
+# Create a venv (assumes python)
+if (!(Test-Path .\.venv)){
+    Write-Output "Create python venv.."
+    & python.exe -m venv .venv
+}else
+{
+    Write-Output "Detected .venv Skipping"
+}
 Write-Output "Install python requirements.."
-& pip3.7.exe install -r $requirements
+& .\.venv\Scripts\pip.exe install -r $requirements
 
 Write-Output "Remove Previous Versions"
 if (Test-Path .\dist){
