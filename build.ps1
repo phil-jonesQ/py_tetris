@@ -4,6 +4,7 @@ $distDirectory = Join-Path $PSScriptRoot "dist"
 $appDirectory = Join-Path $distDirectory $appName
 $archivePath = Join-Path $distDirectory "$appName.zip"
 $workDirectory = Join-Path $PSScriptRoot "build\pyinstaller"
+$buildEnvironment = Join-Path ([System.IO.Path]::GetTempPath()) "py-tetris-build-$([guid]::NewGuid().ToString('N'))"
 $uvCommand = Get-Command uv -ErrorAction SilentlyContinue
 
 if (-not $uvCommand) {
@@ -28,8 +29,10 @@ function Invoke-Uv {
 }
 
 Push-Location $PSScriptRoot
+$previousProjectEnvironment = $env:UV_PROJECT_ENVIRONMENT
 try {
-    Invoke-Uv -UvArguments @("sync", "--locked", "--extra", "dev")
+    $env:UV_PROJECT_ENVIRONMENT = $buildEnvironment
+    Invoke-Uv -UvArguments @("sync", "--locked", "--extra", "dev", "--link-mode", "copy")
     Invoke-Uv -UvArguments @("run", "pytest")
 
     if (Test-Path -LiteralPath $appDirectory) {
@@ -61,5 +64,14 @@ try {
     Write-Output "Archive created: $archivePath"
 }
 finally {
+    if ($null -eq $previousProjectEnvironment) {
+        Remove-Item Env:UV_PROJECT_ENVIRONMENT -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:UV_PROJECT_ENVIRONMENT = $previousProjectEnvironment
+    }
     Pop-Location
+    if (Test-Path -LiteralPath $buildEnvironment) {
+        Remove-Item -LiteralPath $buildEnvironment -Recurse -Force
+    }
 }
