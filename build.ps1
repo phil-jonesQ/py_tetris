@@ -1,60 +1,65 @@
-## Build Script For Python Application
+$ErrorActionPreference = "Stop"
+$appName = "py_tetris"
+$distDirectory = Join-Path $PSScriptRoot "dist"
+$appDirectory = Join-Path $distDirectory $appName
+$archivePath = Join-Path $distDirectory "$appName.zip"
+$workDirectory = Join-Path $PSScriptRoot "build\pyinstaller"
+$uvCommand = Get-Command uv -ErrorAction SilentlyContinue
 
-# Setup
-$app_name="py_tetris"
-$requirements=".\pip_requirements.txt" # Create with pip freeze > pip_requirements.txt
-$path_to_build_util=".\.venv\Lib\site-packages\PyInstaller" # Path to PyInstaller (creates exe from python source)
-$exta_files=@('*.json','*.md')
-$python_version=$(& python --version).split(' ').split('.')
-$python_version_major_required=[int]"3"
-$python_version_minor_required=[int]"10"
-
-# Check Python is installed, otherwise abort
-# convert major version and minor to int
-$python_version_major=[int]$python_version[1]
-$python_version_minor=[int]$python_version[2]
-if ( $python_version_major -lt $python_version_major_required ) {
-    Write-Output "Error: Python is either not detected or less than $($python_version_major_required).x"
-    exit(1)
-}
-if ( $python_version_minor -lt $python_version_minor_required ){
-    Write-Output "Error: Python is either not detected or less than $($python_version_major_required).$($python_version_minor_required)"
-    exit(1)
-}
-Write-Output "Python $($python_version) detected - proceeding..."
-
-
-# Create a venv (assumes python)
-if (!(Test-Path .\.venv)){
-    Write-Output "Create python venv.."
-    & python.exe -m venv .venv
-}else
-{
-    Write-Output "Detected .venv Skipping"
-}
-Write-Output "Install python requirements.."
-& .\.venv\Scripts\pip.exe install -r $requirements
-
-Write-Output "Remove Previous Versions"
-if (Test-Path .\dist){
-    Remove-Item .\dist -Recurse -Force
-}
-
-Write-Output "Building Application..."
-& python.exe $path_to_build_util .\py_tetris.py --onefile
-
-# Check the Application built OK
-if (Test-Path .\dist) {
-    # Deploy files into dist folder
-    Copy-Item .\game_assets .\dist -Recurse -Force
-    # Deploy any extras defined earlier
-    foreach ($file_type in $exta_files){
-        Copy-Item $file_type .\dist\ -Force
+if (-not $uvCommand) {
+    python.exe -m uv --version
+    if ($LASTEXITCODE -ne 0) {
+        throw "uv is required. Install it from https://docs.astral.sh/uv/getting-started/installation/"
     }
 }
-else {
-    Write-Output "Error Failed to build application..."
+
+function Invoke-Uv {
+    param([string[]]$UvArguments)
+
+    if ($uvCommand) {
+        & $uvCommand.Source @UvArguments
+    }
+    else {
+        python.exe -m uv @UvArguments
+    }
+    if ($LASTEXITCODE -ne 0) {
+        throw "uv $($UvArguments -join ' ') failed with exit code $LASTEXITCODE"
+    }
 }
 
-# Package Application
-Compress-Archive -Path .\dist -DestinationPath .\dist\$app_name.zip
+Push-Location $PSScriptRoot
+try {
+    Invoke-Uv -UvArguments @("sync", "--locked", "--extra", "dev")
+    Invoke-Uv -UvArguments @("run", "pytest")
+
+    if (Test-Path -LiteralPath $appDirectory) {
+        Remove-Item -LiteralPath $appDirectory -Recurse -Force
+    }
+    if (Test-Path -LiteralPath $archivePath) {
+        Remove-Item -LiteralPath $archivePath -Force
+    }
+    if (Test-Path -LiteralPath $workDirectory) {
+        Remove-Item -LiteralPath $workDirectory -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $appDirectory, $workDirectory -Force | Out-Null
+
+    Invoke-Uv -UvArguments @(
+        "run", "pyinstaller", "--noconfirm", "--clean", "--onefile",
+        "--name", $appName,
+        "--distpath", $appDirectory,
+        "--workpath", $workDirectory,
+        "--specpath", $workDirectory,
+        ".\py_tetris.py"
+    )
+
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot "game_assets") -Destination $appDirectory -Recurse
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot "high_score.json") -Destination $appDirectory
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot "README.md") -Destination $appDirectory
+    Compress-Archive -Path (Join-Path $appDirectory "*") -DestinationPath $archivePath
+
+    Write-Output "Build complete: $appDirectory"
+    Write-Output "Archive created: $archivePath"
+}
+finally {
+    Pop-Location
+}
